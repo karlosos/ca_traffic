@@ -28,7 +28,17 @@ Then install packages with:
 pip install -r requirements.txt
 ```
 
-Now you have successfully configured your environemnt.
+Now you have successfully configured your environment.
+
+
+#### Simulation tweaking
+
+Edit `simulation.py`. Create roads, generators and terminators.
+Terminator is used as a black hole (road where cells disappear). 
+Connect objects (such as lanes, generators and terminators) with `Lane.link(lane1, lane2)`.
+
+Run with `python simulation.py`.
+
 
 ## Contruburing 
 
