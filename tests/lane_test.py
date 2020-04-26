@@ -125,5 +125,27 @@ class LaneLinksTest(unittest.TestCase):
         l2.simulation_step()
         self.assertEqual(l2.cells, [(1, True), None])
 
+    def test_simulation_two_lanes_many_iterations(self):
+        l1 = Lane(lane_length=1, randomization=True)
+        l2 = Lane(lane_length=1, randomization=True)
+        Lane.link_lanes(l1, l2)
+        Lane.link_lanes(l2, l1)
+        l1.cells[0] = (0, False)
+
+        for i in range(100):
+            l1.simulation_step()
+            l2.simulation_step()
+            l1.clear_flags()
+            l2.clear_flags()
+
+        found_not_none_cell = 0
+        for cell in l1.cells:
+            if cell is not None:
+                found_not_none_cell += 1
+        for cell in l2.cells:
+            if cell is not None:
+                found_not_none_cell += 1
+        self.assertEqual(found_not_none_cell, 1)
+
 if __name__ == '__main__':
     unittest.main()

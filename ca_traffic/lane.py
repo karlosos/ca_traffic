@@ -3,10 +3,9 @@ Lane model based on NagelSch
 
 Check https://www.wikiwand.com/en/Nagel%E2%80%93Schreckenberg_model for more insights
 
-Every car is represented as non-negative number. 0 - car is not moving, 1 - cars velocity is 1, and etc.
--1 is designated for empty space in lane
+Every car is represented as tuple.
+First element is velocity, second is flag if cell was simulated
 """
-import numpy as np
 import random
 from ca_traffic.abstract_lane import AbstractLane
 
@@ -68,12 +67,13 @@ class Lane(AbstractLane):
         for i, cell in enumerate(self.cells):
             if cell is not None and cell[1] is False:
                 v = cell[0]
-                j = (i + v)
-                if j < self.lane_length:
-                    self.cells[j] = (cell[0], True)
-                else:
-                    self.insert_cell(j, (cell[0], True))
-                self.cells[i] = None
+                if v > 0:
+                    j = (i + v)
+                    if j < self.lane_length:
+                        self.cells[j] = (cell[0], True)
+                    else:
+                        self.insert_cell(j, (cell[0], True))
+                    self.cells[i] = None
 
     def clear_flags(self):
         self.cells = [(cell[0], False) if cell is not None else None for cell in self.cells]
@@ -86,7 +86,7 @@ class Lane(AbstractLane):
                 first_road = self.cells[0:n]
                 remaining_length = n - self.lane_length
                 second_road = self.end_connector.next_cells(remaining_length)
-                return np.concatenate((first_road, second_road))
+                return first_road + second_road
             else:
                 return self.cells
 
@@ -108,3 +108,10 @@ class Lane(AbstractLane):
         else:
             if self.end_connector is not None:
                 self.end_connector.insert_cell(index - self.lane_length, value)
+
+    def print(self):
+        for cell in self.cells:
+            if cell is None:
+                print("▮", end='')
+            else:
+                print(cell[0], end='')

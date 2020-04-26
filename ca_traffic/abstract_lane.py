@@ -20,3 +20,7 @@ class AbstractLane(ABC):
         lane_a.end_connector = Connector()
         lane_a.end_connector.end_lane = lane_b
         lane_b.start_connector = lane_a.end_connector
+
+    @abstractmethod
+    def simulation_step(self):
+        pass
