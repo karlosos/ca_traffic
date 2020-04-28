@@ -4,6 +4,7 @@ import numpy as np
 from resizer import fit_tk, array_to_tk
 import cv2
 from Simulation import Simulation
+from tkinter import ALL, EventType
 
 
 class GUI:
@@ -44,7 +45,9 @@ class GUI:
         self.canvas = tk.Canvas(master=self.master, width=self.model_preview.cellmap.shape[1],
                                 height=self.model_preview.cellmap.shape[0], borderwidth=5,
                                 background='white', yscrollcommand=self.canvas_vertical_scroll,
-                                xscrollcommand=self.canvas_horizontal_scroll)
+                                xscrollcommand=self.canvas_horizontal_scroll,
+                                scrollregion=(0, 0, self.model_preview.cellmap.shape[1],
+                                              self.model_preview.cellmap.shape[0]))
         self.canvas_vertical_scroll.config(command=self.canvas.yview)
         self.canvas_horizontal_scroll.config(command=self.canvas.xview)
         self.canvas_vertical_scroll.place(x=250, y=75, relheight=self.canvas_relheight)
@@ -52,6 +55,9 @@ class GUI:
         self.canvas.place(x=275, y=75, relwidth=self.canvas_relwidth, relheight=self.canvas_relheight)
         self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
         self.canvas.bind("<Button-1>", self.place_part)
+        self.canvas.bind("<MouseWheel>", self.do_zoom)
+        self.start_button = tk.Button(master=self.master, text="Start simulation", command=self.start_simulation)
+        self.start_button.place(x=400, y=20)
 
     def make_preview(self):
         self.part_preview.initialize_map()
@@ -86,7 +92,22 @@ class GUI:
         self.canvas_image = array_to_tk(self.model_preview.colormap)
         self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
 
+    def do_zoom(self, event):
+        factor = 1.001 ** event.delta
+        self.canvas.scale(ALL, event.x, event.y, factor, factor)
 
+    def start_simulation(self):
+        self.model_preview.cellmap_outline_roads()
+        self.model_preview.initialize_map()
+        self.model_preview.find_starting_point()
+        while True:
+            if len(self.model_preview.cars) < 5:
+                self.model_preview.add_car()
+            self.model_preview.step()
+            self.model_preview.print_map()
+            k = cv2.waitKey(50)
+            if k == 27:
+                break
 
 
 

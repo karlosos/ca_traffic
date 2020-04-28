@@ -4,10 +4,11 @@ import numpy as np
 from resizer import fit
 from random import randrange
 from Cell import Cell
+from Vec2D import Vec2D
 
 
 class Simulation:
-    def __init__(self, sizeX, sizeY, p=15, roadcolor=None, carcolor=None, sidecolor=None, nonecolor=None, slowcolor=None):
+    def __init__(self, sizeX, sizeY, p=15, starting_point=None, roadcolor=None, carcolor=None, sidecolor=None, nonecolor=None, slowcolor=None):
         if roadcolor is None:
             roadcolor = [125, 125, 125]
         if carcolor is None:
@@ -27,6 +28,7 @@ class Simulation:
         self.sidecolor = sidecolor
         self.nonecolor = nonecolor
         self.slowcolor = slowcolor
+        self.starting_point = starting_point
 
     def print_map(self):
         image = cv2.cvtColor(self.colormap, cv2.COLOR_BGR2RGB)
@@ -53,18 +55,27 @@ class Simulation:
                             if self.cellmap[row + i, col + j].kind is None:
                                 self.cellmap[row + i, col + j].kind = "side"
 
-    def add_car(self, pos, vel=1):
-        assert 0 <= pos.x < self.cellmap.shape[0] and 0 <= pos.y < self.cellmap.shape[1], "Invalid position"
-        assert self.cellmap[pos.x, pos.y].kind == "road", "Position is not a road"
+    def add_car(self, pos=None, vel=1):
+        if pos is None:
+            pos = self.starting_point
+        else:
+            assert 0 <= pos.x < self.cellmap.shape[0] and 0 <= pos.y < self.cellmap.shape[1], "Invalid position"
+            assert self.cellmap[pos.x, pos.y].kind == "road", "Position is not a road"
         assert 0 < vel < 5, "Invalid velocity"
         car = Car(position=pos, velocity=vel)
         self.cellmap[pos.x, pos.y].car = car
         self.cars.append(car)
 
     def step(self):
+        toRemove = []
         for car in self.cars:
             for i in range(car.velocity):
                 cell = self.cellmap[car.position.x, car.position.y]
+                if cell.kind != "road":
+                    self.colormap[car.position.x, car.position.y] = self.sidecolor
+                    cell.car = None
+                    toRemove.append(car)
+                    break
 
                 direction = car.oldDirection
 
@@ -80,14 +91,11 @@ class Simulation:
 
                 newpos = car.position.add(direction)
 
-                if newpos.x < 0:
-                    newpos.x = self.cellmap.shape[0] - 1 + car.position.x
-                elif newpos.x >= self.cellmap.shape[0] - 1:
-                    newpos.x -= self.cellmap.shape[0] - 1
-                if newpos.y < 0:
-                    newpos.y = self.cellmap.shape[1] - 1 + car.position.y
-                elif newpos.y >= self.cellmap.shape[1] - 1:
-                    newpos.y -= self.cellmap.shape[1] - 1
+                if newpos.x < 0 or newpos.x >= self.cellmap.shape[0] - 1 or newpos.y < 0 \
+                        or newpos.y >= self.cellmap.shape[1] - 1:
+                    cell.car = None
+                    toRemove.append(car)
+                    break
 
                 if self.cellmap[newpos.x, newpos.y].car is not None:
                     car.velocity = self.cellmap[newpos.x, newpos.y].car.velocity
@@ -103,6 +111,22 @@ class Simulation:
                 self.colormap[car.position.x, car.position.y] = self.carcolor
                 self.cellmap[car.position.x, car.position.y].car = car
                 car.oldDirection = direction
+
+        for cartoremove in toRemove:
+            self.cars.remove(cartoremove)
+
+    def find_starting_point(self):
+        for y in range(int(self.cellmap.shape[1]/2)):
+            for x in range(self.cellmap.shape[0]):
+                for direc in self.cellmap[x, y].direction:
+                    if direc.x == 0 and direc.y == 1 and self.cellmap[x, y].kind == "road":
+                        self.starting_point = Vec2D(x, y)
+                        return
+                for direc in self.cellmap[x, -y].direction:
+                    if direc.x == 0 and direc.y == -1 and self.cellmap[x, -y].kind == "road":
+                        self.starting_point = Vec2D(x, -y)
+                        return
+
 
 
 
