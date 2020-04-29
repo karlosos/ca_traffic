@@ -8,6 +8,7 @@ First element is velocity, second is flag if cell was simulated
 """
 import random
 from ca_traffic.abstract_lane import AbstractLane
+from ca_traffic.gui.lane_render import LaneRender
 
 
 class Lane(AbstractLane):
@@ -19,6 +20,8 @@ class Lane(AbstractLane):
         self.start_connector = None
         self.end_connector = None
         self.randomization = randomization
+
+        self.renderer = LaneRender(self)
 
     def acceleration(self, cell):
         if cell is None:
@@ -95,7 +98,7 @@ class Lane(AbstractLane):
         v = length
         for k in range(1, v + 1):
             if i + k < self.lane_length:
-                if self.cells[(i + k) % self.lane_length] is not None:
+                if self.cells[i + k] is not None:
                     return True, k
             else:
                 if self.end_connector.get_cell(i + k - self.lane_length) is not None:
@@ -108,10 +111,3 @@ class Lane(AbstractLane):
         else:
             if self.end_connector is not None:
                 self.end_connector.insert_cell(index - self.lane_length, value)
-
-    def print(self):
-        for cell in self.cells:
-            if cell is None:
-                print("▮", end='')
-            else:
-                print(cell[0], end='')
