@@ -35,7 +35,7 @@ class GUI:
         # canvas
         self.canvas_relwidth = 0.6
         self.canvas_relheight = 0.7
-        self.model_preview = Simulation(500, 500)
+        self.model_preview = Simulation(500, 500, 50)
         self.model_preview.initialize_map()
         self.canvas_image = array_to_tk(self.model_preview.colormap)
         self.model_preview_desc = tk.Label(self.master, text="Preview of model")
@@ -85,8 +85,14 @@ class GUI:
             msg.showerror("Part won't fit horizontally")
             return
 
-        self.model_preview.cellmap[row:row+self.part_preview.cellmap.shape[1],
-                                   col:col+self.part_preview.cellmap.shape[0]] = self.part_preview.cellmap
+        # self.model_preview.cellmap[row:row+self.part_preview.cellmap.shape[1],
+        #                            col:col+self.part_preview.cellmap.shape[0]] = self.part_preview.cellmap
+        for x in range(row, row+self.part_preview.cellmap.shape[1]):
+            for y in range(col, col+self.part_preview.cellmap.shape[0]):
+                if self.model_preview.cellmap[x, y].kind is None and self.part_preview.cellmap[x-row, y-col].kind is not None:
+                    self.model_preview.cellmap[x, y] = self.part_preview.cellmap[x-row, y-col]
+                elif self.model_preview.cellmap[x, y].kind == "road" and self.part_preview.cellmap[x-row, y-col].kind == "road":  # bugs sometimes
+                    self.model_preview.cellmap[x, y].direction.append(self.part_preview.cellmap[x-row, y-col].direction[0])
 
         self.model_preview.initialize_map()
         self.canvas_image = array_to_tk(self.model_preview.colormap)
@@ -97,6 +103,8 @@ class GUI:
         self.canvas.scale(ALL, event.x, event.y, factor, factor)
 
     def start_simulation(self):
+        cv2.namedWindow("Map", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("Map", 1280, 800)
         self.model_preview.cellmap_outline_roads()
         self.model_preview.initialize_map()
         self.model_preview.find_starting_point()
@@ -104,9 +112,10 @@ class GUI:
             if len(self.model_preview.cars) < 5:
                 self.model_preview.add_car()
             self.model_preview.step()
-            self.model_preview.print_map()
+            self.model_preview.print_map("Map")
             k = cv2.waitKey(50)
             if k == 27:
+                cv2.destroyAllWindows()
                 break
 
 
