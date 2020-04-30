@@ -30,6 +30,7 @@ class GUI:
         self.preview_scrollbar.place(x=25, y=255, height=50)
         self.part_options_listbox.place(x=40, y=255, width=180, height=50)
         self.part_options_listbox.insert(0, "cross-section")
+        self.part_options_listbox.insert(1, "cross-section-x")
         self.load_button = tk.Button(master=self.master, text="Load model", command=self.load_part)
         self.load_button.place(x=25, y=310)
         # canvas
@@ -73,6 +74,11 @@ class GUI:
             self.part_preview = Simulation(array.shape[0], array.shape[1])
             self.part_preview.cellmap = array
             self.make_preview()
+        elif i == 1:
+            array = np.load("cross-section-x.npy", allow_pickle=True)
+            self.part_preview = Simulation(array.shape[0], array.shape[1])
+            self.part_preview.cellmap = array
+            self.make_preview()
 
     def place_part(self, event):
         canvas = event.widget
@@ -89,10 +95,26 @@ class GUI:
         #                            col:col+self.part_preview.cellmap.shape[0]] = self.part_preview.cellmap
         for x in range(row, row+self.part_preview.cellmap.shape[1]):
             for y in range(col, col+self.part_preview.cellmap.shape[0]):
-                if self.model_preview.cellmap[x, y].kind is None and self.part_preview.cellmap[x-row, y-col].kind is not None:
-                    self.model_preview.cellmap[x, y] = self.part_preview.cellmap[x-row, y-col]
-                elif self.model_preview.cellmap[x, y].kind == "road" and self.part_preview.cellmap[x-row, y-col].kind == "road":  # bugs sometimes
-                    self.model_preview.cellmap[x, y].direction.append(self.part_preview.cellmap[x-row, y-col].direction[0])
+                modelcell = self.model_preview.cellmap[x, y]
+                partcell = self.part_preview.cellmap[x-row, y-col]
+                if modelcell.kind is None and partcell.kind is not None:
+                    self.model_preview.cellmap[x, y] = partcell
+                elif modelcell.kind == "road" and partcell.kind == "road":  # bugs sometimes
+                    # self.model_preview.cellmap[x, y].direction.append(self.part_preview.cellmap[x-row, y-col].direction[0])
+                    for dir in partcell.direction:
+                        if not any(dir.equal(direc) for direc in modelcell.direction):
+                            self.model_preview.cellmap[x, y].direction.append(dir)
+
+        # selected = []
+        # for x in range(row, row+self.part_preview.cellmap.shape[1]):
+        #     for y in range(col, col+self.part_preview.cellmap.shape[0]):
+        #         if self.model_preview.cellmap[x, y].kind == "road":
+        #             for dire in self.model_preview.cellmap[x, y].direction:
+        #                 nextcell = self.model_preview.cellmap[x+dire.x, y+dire.y]
+        #                 if nextcell.kind != "road":
+        #                     selected.append((x, y, dire))
+        # for x, y, dire in selected:
+        #     self.model_preview.cellmap[x, y].direction.remove(dire)
 
         self.model_preview.initialize_map()
         self.canvas_image = array_to_tk(self.model_preview.colormap)
@@ -109,7 +131,7 @@ class GUI:
         self.model_preview.initialize_map()
         self.model_preview.find_starting_point()
         while True:
-            if len(self.model_preview.cars) < 5:
+            if len(self.model_preview.cars) < 20:
                 self.model_preview.add_car()
             self.model_preview.step()
             self.model_preview.print_map("Map")

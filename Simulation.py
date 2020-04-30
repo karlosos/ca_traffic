@@ -6,10 +6,6 @@ from random import randrange
 from Cell import Cell
 from Vec2D import Vec2D
 
-# def zoom(event, x, y, flags, param):
-#     if event == cv2.EVENT_MOUSEHWHEEL:
-
-
 
 class Simulation:
     def __init__(self, sizeX, sizeY, p=15, starting_point=None, roadcolor=None, carcolor=None, sidecolor=None, nonecolor=None, slowcolor=None):
@@ -74,7 +70,7 @@ class Simulation:
         for car in self.cars:
             for i in range(car.velocity):
                 cell = self.cellmap[car.position.x, car.position.y]
-                if cell.kind == "side":
+                if all(dire.equal(Vec2D(0, 0)) for dire in cell.direction):
                     self.colormap[car.position.x, car.position.y] = self.sidecolor
                     cell.car = None
                     toRemove.append(car)
