@@ -22,9 +22,9 @@ if __name__ == "__main__":
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
 
-    mp.add_car(pos=Vec2D(49, 5))
-    mp.add_car(pos=Vec2D(49, 1), vel=2)
-    mp.add_car(pos=Vec2D(5, 51))
+    # mp.add_car(pos=Vec2D(49, 5))
+    # mp.add_car(pos=Vec2D(49, 1), vel=2)
+    # mp.add_car(pos=Vec2D(5, 51))
 
     # mp = Simulation(50, 50, p=50)
 

@@ -70,7 +70,7 @@ class Simulation:
         for car in self.cars:
             for i in range(car.velocity):
                 cell = self.cellmap[car.position.x, car.position.y]
-                if all(dire.equal(Vec2D(0, 0)) for dire in cell.direction):
+                if all(dire.equal(Vec2D(0, 0)) for dire in cell.direction) or cell.direction is None:
                     self.colormap[car.position.x, car.position.y] = self.sidecolor
                     cell.car = None
                     toRemove.append(car)
