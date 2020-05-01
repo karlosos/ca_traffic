@@ -60,14 +60,14 @@ class GUI:
         self.start_button = tk.Button(master=self.master, text="Start simulation", command=self.start_simulation)
         self.start_button.place(x=400, y=20)
 
-    def make_preview(self):
+    def make_preview(self):  # działa
         self.part_preview.initialize_map()
         image = cv2.cvtColor(self.part_preview.colormap, cv2.COLOR_BGR2RGB)
         f = fit_tk(image, self.preview_Label.winfo_width(), self.preview_Label.winfo_height())
         self.preview_Label.configure(image=f)
         self.preview_Label.image = f
 
-    def load_part(self):
+    def load_part(self):  # działa
         i = self.part_options_listbox.curselection()[0]
         if i == 0:
             array = np.load("cross-section.npy", allow_pickle=True)
@@ -80,7 +80,7 @@ class GUI:
             self.part_preview.cellmap = array
             self.make_preview()
 
-    def place_part(self, event):
+    def place_part(self, event):  # bug
         canvas = event.widget
         row = int(canvas.canvasy(event.y))
         col = int(canvas.canvasx(event.x))
@@ -120,11 +120,11 @@ class GUI:
         self.canvas_image = array_to_tk(self.model_preview.colormap)
         self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
 
-    def do_zoom(self, event):
+    def do_zoom(self, event):  # nie działa
         factor = 1.001 ** event.delta
         self.canvas.scale(ALL, event.x, event.y, factor, factor)
 
-    def start_simulation(self):
+    def start_simulation(self):  # działa
         cv2.namedWindow("Map", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("Map", 1280, 800)
         self.model_preview.cellmap_outline_roads()

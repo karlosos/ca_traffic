@@ -30,11 +30,11 @@ class Simulation:
         self.slowcolor = slowcolor
         self.starting_point = starting_point
 
-    def print_map(self, window):
+    def print_map(self, window):  # działa
         image = cv2.cvtColor(self.colormap, cv2.COLOR_BGR2RGB)
         cv2.imshow(window, image)
 
-    def initialize_map(self):
+    def initialize_map(self):  # działa
         for row in range(self.cellmap.shape[0]):
             for col in range(self.cellmap.shape[1]):
                 if self.cellmap[row, col].kind == "road":
@@ -45,7 +45,7 @@ class Simulation:
                 elif self.cellmap[row, col].kind == "side":
                     self.colormap[row, col] = self.sidecolor
 
-    def cellmap_outline_roads(self):
+    def cellmap_outline_roads(self):  # działa
         for row in range(1, self.cellmap.shape[0] - 1):
             for col in range(1, self.cellmap.shape[1] - 1):
                 if self.cellmap[row, col].kind == "road":
@@ -65,10 +65,11 @@ class Simulation:
         self.cellmap[pos.x, pos.y].car = car
         self.cars.append(car)
 
-    def step(self):
+    def step(self):  # działa
         toRemove = []
         for car in self.cars:
             for i in range(car.velocity):
+                # początek reguł tutaj
                 cell = self.cellmap[car.position.x, car.position.y]
                 if all(dire.equal(Vec2D(0, 0)) for dire in cell.direction) or cell.direction is None:
                     self.colormap[car.position.x, car.position.y] = self.sidecolor
@@ -114,15 +115,15 @@ class Simulation:
         for cartoremove in toRemove:
             self.cars.remove(cartoremove)
 
-    def find_starting_point(self):
+    def find_starting_point(self):  # działa
         for y in range(int(self.cellmap.shape[1]/2)):
             for x in range(self.cellmap.shape[0]):
                 for direc in self.cellmap[x, y].direction:
-                    if direc.x == 0 and direc.y == 1 and self.cellmap[x, y].kind == "road":
+                    if direc.equal(Vec2D(0, 1)) and self.cellmap[x, y].kind == "road":
                         self.starting_point = Vec2D(x, y)
                         return
                 for direc in self.cellmap[x, -y].direction:
-                    if direc.x == 0 and direc.y == -1 and self.cellmap[x, -y].kind == "road":
+                    if direc.equal(Vec2D(0, -1)) and self.cellmap[x, -y].kind == "road":
                         self.starting_point = Vec2D(x, -y)
                         return
 
