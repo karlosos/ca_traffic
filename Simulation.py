@@ -19,7 +19,7 @@ class Simulation:
             nonecolor = [255, 255, 255]
         if slowcolor is None:
             slowcolor = [255, 0, 0]
-        self.cellmap = np.array([list(Cell() for i in range(sizeX)) for j in range(sizeY)])
+        self.cellmap = np.array([list(Cell() for _ in range(sizeX)) for _ in range(sizeY)])
         self.colormap = np.array(np.full([sizeY, sizeX, 3], 255), dtype=np.uint8)
         self.cars = []
         self.probabilityOfTurn = p
