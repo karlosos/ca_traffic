@@ -136,6 +136,9 @@ class GUI:
             self.straight_road_entry_length.place_forget()
             self.straight_road_direction_label.place_forget()
             self.straight_road_entry_direction.place_forget()
+            self.straight_road_entry_length.delete(0, 'end')
+            self.straight_road_entry_width.delete(0, 'end')
+            self.straight_road_entry_direction.delete(0, 'end')
         if self.currentlychosen == 0:
             self.part_preview = Simulation(1, 1)
             self.make_preview()
