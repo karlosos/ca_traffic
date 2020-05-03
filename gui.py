@@ -9,6 +9,7 @@ import numpy as np
 from Simulation import Simulation
 from Vec2D import Vec2D
 from resizer import fit_tk, array_to_tk
+from copy import deepcopy
 
 
 class GUI:
@@ -174,20 +175,20 @@ class GUI:
         if col + self.part_preview.cellmap.shape[0] > self.model_preview.cellmap.shape[0]:
             msg.showerror("Error", "Part won't fit horizontally")
             return
-
+        partpreviewcopy = deepcopy(self.part_preview)
         # self.model_preview.cellmap[row:row+self.part_preview.cellmap.shape[1],
         #                            col:col+self.part_preview.cellmap.shape[0]] = self.part_preview.cellmap
         for x in range(row, row+self.part_preview.cellmap.shape[1]):
             for y in range(col, col+self.part_preview.cellmap.shape[0]):
                 modelcell = self.model_preview.cellmap[x, y]
-                partcell = self.part_preview.cellmap[x-row, y-col]
+                partcell = partpreviewcopy.cellmap[x-row, y-col]
                 if modelcell.kind is None and partcell.kind is not None:
                     self.model_preview.cellmap[x, y] = partcell
                 elif modelcell.kind == "road" and partcell.kind == "road":  # bugs sometimes
                     # self.model_preview.cellmap[x, y].direction.append(self.part_preview.cellmap[x-row, y-col].direction[0])
                     for dire in partcell.direction:
                         if not any(dire.equal(direc) for direc in modelcell.direction):
-                            self.model_preview.cellmap[x, y].direction.append(dire)
+                            self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
 
         selected = []
         for x in range(row, row+self.part_preview.cellmap.shape[1]):
