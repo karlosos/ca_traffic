@@ -79,6 +79,8 @@ class GUI:
         self.imageId = self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
         self.canvas.bind("<Button-1>", self.place_part)
         self.canvas.bind("<MouseWheel>", self.do_zoom)
+        self.canvas.bind("<Motion>", self.mouse_over_canvas)
+        self.canvas.bind("<Leave>", self.mouse_leaves_canvas)
         self.start_button = tk.Button(master=self.master, text="Start simulation", command=self.start_simulation)
         self.start_button.place(x=425, y=20)
 
@@ -171,7 +173,7 @@ class GUI:
             self.part_preview.cellmap = array
             self.make_preview()
 
-    def place_part(self, event):  # bug
+    def place_part(self, event):
         canvas = event.widget
         row = int(canvas.canvasy(event.y)/self.scale)
         col = int(canvas.canvasx(event.x)/self.scale)
@@ -183,13 +185,12 @@ class GUI:
             col - int(self.part_preview.cellmap.shape[0]/2) < 0:
             msg.showerror("Part won't fit horizontally")
             return
-        partpreviewcopy = deepcopy(self.part_preview)
-        # self.model_preview.cellmap[row:row+self.part_preview.cellmap.shape[1],
-        #                            col:col+self.part_preview.cellmap.shape[0]] = self.part_preview.cellmap
-        for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(self.part_preview.cellmap.shape[1]/2)):
-            for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(self.part_preview.cellmap.shape[0]/2)):
+        part_preview = deepcopy(self.part_preview)
+
+        for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(part_preview.cellmap.shape[1]/2)):
+            for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
                 modelcell = self.model_preview.cellmap[x, y]
-                partcell = self.part_preview.cellmap[x-row+int(self.part_preview.cellmap.shape[0]/2), y-col+int(self.part_preview.cellmap.shape[1]/2)]
+                partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
                 if modelcell.kind is None and partcell.kind is not None:
                     self.model_preview.cellmap[x, y] = partcell
                     self.model_preview.colormap[x, y] = self.model_preview.roadcolor
@@ -230,8 +231,37 @@ class GUI:
         self.canvas.scale('all', 0, 0, tmpScale, tmpScale)
         self.canvas.configure(scrollregion = (0, 0, w, h))
         
-        
+    def mouse_over_canvas(self, event):
+        canvas = event.widget
+        [part_size_x, part_size_y, _] = self.part_preview.colormap.shape
+        # row = int(canvas.canvasy(event.y) - part_size_x/2)
+        # col = int(canvas.canvasx(event.x) - part_size_y/2)
+        row = int(canvas.canvasy(event.y)/self.scale - part_size_x/2)
+        col = int(canvas.canvasx(event.x)/self.scale - part_size_y/2)
+        model_image = self.model_preview.colormap.copy()
+        part_preview_image = self.part_preview.colormap.copy()
 
+        try:
+            model_image_crop = model_image[row:row+part_size_x, col:col+part_size_y]
+            roads_index = np.logical_not(part_preview_image == self.model_preview.nonecolor)
+            model_image_crop[roads_index] = part_preview_image[roads_index] 
+        except:
+            pass
+
+        self.canvas_image = array_to_tk(model_image)
+
+        im = Image.fromarray(model_image)
+        w = int(im.width * self.scale)
+        h = int(im.height * self.scale)
+        img = im.resize((w, h), Image.ANTIALIAS)
+        self.canvas_image = ImageTk.PhotoImage(img)
+        self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
+    
+    def mouse_leaves_canvas(self, event):
+        return 
+        self.canvas_image = array_to_tk(self.model_preview.colormap)
+        self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
+        
     def start_simulation(self):  # działa
         cv2.namedWindow("Map", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("Map", 1280, 800)
@@ -247,12 +277,3 @@ class GUI:
             if k == 27:
                 cv2.destroyAllWindows()
                 break
-
-
-
-
-
-
-
-
-
