@@ -38,6 +38,7 @@ class GUI:
         self.part_options_listbox.insert(0, "generate straight-road")
         self.part_options_listbox.insert(1, "cross-section")
         self.part_options_listbox.insert(2, "cross-section-x")
+        self.part_options_listbox.insert(3, "traffic-circle")
         self.load_button = tk.Button(master=self.master, text="Load model", command=self.load_part)
         self.load_button.place(x=25, y=310)
         # straight road generation
@@ -161,6 +162,11 @@ class GUI:
             self.make_preview()
         elif self.currentlychosen == 2:
             array = np.load("cross-section-x.npy", allow_pickle=True)
+            self.part_preview = Simulation(array.shape[0], array.shape[1])
+            self.part_preview.cellmap = array
+            self.make_preview()
+        elif self.currentlychosen == 3:
+            array = np.load("traffic-circle.npy", allow_pickle=True)
             self.part_preview = Simulation(array.shape[0], array.shape[1])
             self.part_preview.cellmap = array
             self.make_preview()
