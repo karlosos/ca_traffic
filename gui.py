@@ -182,26 +182,14 @@ class GUI:
             for y in range(col, col+self.part_preview.cellmap.shape[0]):
                 modelcell = self.model_preview.cellmap[x, y]
                 partcell = partpreviewcopy.cellmap[x-row, y-col]
-                if modelcell.kind is None and partcell.kind is not None:
+                if (modelcell.kind is None or modelcell.kind == "side") and partcell.kind is not None:
                     self.model_preview.cellmap[x, y] = partcell
-                elif modelcell.kind == "road" and partcell.kind == "road":  # bugs sometimes
-                    # self.model_preview.cellmap[x, y].direction.append(self.part_preview.cellmap[x-row, y-col].direction[0])
+                    self.model_preview.colormap[x, y] = self.model_preview.roadcolor
+                elif modelcell.kind == "road" and partcell.kind == "road":
                     for dire in partcell.direction:
                         if not any(dire.equal(direc) for direc in modelcell.direction):
                             self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
 
-        selected = []
-        for x in range(row, row+self.part_preview.cellmap.shape[1]):
-            for y in range(col, col+self.part_preview.cellmap.shape[0]):
-                if self.model_preview.cellmap[x, y].kind == "road":
-                    for dire in self.model_preview.cellmap[x, y].direction:
-                        nextcell = self.model_preview.cellmap[x+dire.x, y+dire.y]
-                        if nextcell.kind != "road":
-                            selected.append((x, y, dire))
-        for x, y, dire in selected:
-            self.model_preview.cellmap[x, y].direction.remove(dire)
-
-        self.model_preview.initialize_map()
         self.canvas_image = array_to_tk(self.model_preview.colormap)
         self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
 
