@@ -1,0 +1,11 @@
+asgiref==3.2.7
+Django==3.0.5
+image==1.5.31
+numpy==1.18.3
+opencv-python==4.2.0.34
+Pillow==7.1.2
+pygame==1.9.6
+pytz==2020.1
+six==1.14.0
+sqlparse==0.3.1
+tk==0.1.0
