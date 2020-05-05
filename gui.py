@@ -43,8 +43,12 @@ class GUI:
         self.part_options_listbox.place(x=40, y=255, width=180, height=50)
         self.part_options_listbox.insert(0, "generate straight-road")
         self.part_options_listbox.insert(1, "cross-section")
-        self.part_options_listbox.insert(2, "cross-section-x")
+        self.part_options_listbox.insert(2, "cross-section-X")
         self.part_options_listbox.insert(3, "traffic-circle")
+        self.part_options_listbox.insert(4, "cross-section-T-up")
+        self.part_options_listbox.insert(5, "cross-section-T-down")
+        self.part_options_listbox.insert(6, "cross-section-T-left")
+        self.part_options_listbox.insert(7, "cross-section-T-right")
         self.load_button = tk.Button(master=self.master, text="Load model", command=self.load_part)
         self.load_button.place(x=25, y=310)
         # straight road generation
@@ -169,12 +173,32 @@ class GUI:
             self.part_preview.cellmap = array
             self.make_preview()
         elif self.currentlychosen == 2:
-            array = np.load("cross-section-x.npy", allow_pickle=True)
+            array = np.load("cross-section-X.npy", allow_pickle=True)
             self.part_preview = Simulation(array.shape[0], array.shape[1])
             self.part_preview.cellmap = array
             self.make_preview()
         elif self.currentlychosen == 3:
             array = np.load("traffic-circle.npy", allow_pickle=True)
+            self.part_preview = Simulation(array.shape[0], array.shape[1])
+            self.part_preview.cellmap = array
+            self.make_preview()
+        elif self.currentlychosen == 4:
+            array = np.load("cross-section-T-up.npy", allow_pickle=True)
+            self.part_preview = Simulation(array.shape[0], array.shape[1])
+            self.part_preview.cellmap = array
+            self.make_preview()
+        elif self.currentlychosen == 5:
+            array = np.load("cross-section-T-down.npy", allow_pickle=True)
+            self.part_preview = Simulation(array.shape[0], array.shape[1])
+            self.part_preview.cellmap = array
+            self.make_preview()
+        elif self.currentlychosen == 6:
+            array = np.load("cross-section-T-left.npy", allow_pickle=True)
+            self.part_preview = Simulation(array.shape[0], array.shape[1])
+            self.part_preview.cellmap = array
+            self.make_preview()
+        elif self.currentlychosen == 7:
+            array = np.load("cross-section-T-right.npy", allow_pickle=True)
             self.part_preview = Simulation(array.shape[0], array.shape[1])
             self.part_preview.cellmap = array
             self.make_preview()
