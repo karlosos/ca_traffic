@@ -10,6 +10,8 @@ from Simulation import Simulation
 from Vec2D import Vec2D
 from resizer import fit_tk, array_to_tk
 from copy import deepcopy
+from tkinter import ALL, EventType
+from PIL import ImageTk, Image
 
 
 class GUI:
@@ -18,6 +20,10 @@ class GUI:
         self.master = master
         self.master.minsize(900, 500)
         self.master.title("Traffic modelling")
+
+        # Scale
+        self.imageId = 0
+        self.scale = 1
         # preview image
         self.part_preview = Simulation(50, 50)
         self.part_preview.initialize_map()
@@ -67,10 +73,10 @@ class GUI:
                                               self.model_preview.cellmap.shape[0]))
         self.canvas_vertical_scroll.config(command=self.canvas.yview)
         self.canvas_horizontal_scroll.config(command=self.canvas.xview)
-        self.canvas_vertical_scroll.place(x=275, y=75, relheight=self.canvas_relheight)
-        self.canvas_horizontal_scroll.place(x=300, y=50, relwidth=self.canvas_relwidth)
-        self.canvas.place(x=300, y=75, relwidth=self.canvas_relwidth, relheight=self.canvas_relheight)
-        self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
+        self.canvas_vertical_scroll.place(x=250, y=75, relheight=self.canvas_relheight)
+        self.canvas_horizontal_scroll.place(x=275, y=50, relwidth=self.canvas_relwidth)
+        self.canvas.place(x=275, y=75, relwidth=self.canvas_relwidth, relheight=self.canvas_relheight)
+        self.imageId = self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
         self.canvas.bind("<Button-1>", self.place_part)
         self.canvas.bind("<MouseWheel>", self.do_zoom)
         self.start_button = tk.Button(master=self.master, text="Start simulation", command=self.start_simulation)
@@ -167,22 +173,24 @@ class GUI:
 
     def place_part(self, event):  # bug
         canvas = event.widget
-        row = int(canvas.canvasy(event.y))
-        col = int(canvas.canvasx(event.x))
-        if row + self.part_preview.cellmap.shape[1] > self.model_preview.cellmap.shape[1]:
-            msg.showerror("Error", "Part won't fit vertically")
+        row = int(canvas.canvasy(event.y)/self.scale)
+        col = int(canvas.canvasx(event.x)/self.scale)
+        if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
+            row - int(self.part_preview.cellmap.shape[1]/2) < 0:
+            msg.showerror("Part won't fit vertically")
             return
-        if col + self.part_preview.cellmap.shape[0] > self.model_preview.cellmap.shape[0]:
-            msg.showerror("Error", "Part won't fit horizontally")
+        if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
+            col - int(self.part_preview.cellmap.shape[0]/2) < 0:
+            msg.showerror("Part won't fit horizontally")
             return
         partpreviewcopy = deepcopy(self.part_preview)
         # self.model_preview.cellmap[row:row+self.part_preview.cellmap.shape[1],
         #                            col:col+self.part_preview.cellmap.shape[0]] = self.part_preview.cellmap
-        for x in range(row, row+self.part_preview.cellmap.shape[1]):
-            for y in range(col, col+self.part_preview.cellmap.shape[0]):
+        for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(self.part_preview.cellmap.shape[1]/2)):
+            for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(self.part_preview.cellmap.shape[0]/2)):
                 modelcell = self.model_preview.cellmap[x, y]
-                partcell = partpreviewcopy.cellmap[x-row, y-col]
-                if (modelcell.kind is None or modelcell.kind == "side") and partcell.kind is not None:
+                partcell = self.part_preview.cellmap[x-row+int(self.part_preview.cellmap.shape[0]/2), y-col+int(self.part_preview.cellmap.shape[1]/2)]
+                if modelcell.kind is None and partcell.kind is not None:
                     self.model_preview.cellmap[x, y] = partcell
                     self.model_preview.colormap[x, y] = self.model_preview.roadcolor
                 elif modelcell.kind == "road" and partcell.kind == "road":
@@ -190,12 +198,39 @@ class GUI:
                         if not any(dire.equal(direc) for direc in modelcell.direction):
                             self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
 
-        self.canvas_image = array_to_tk(self.model_preview.colormap)
-        self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
+        self.model_preview.initialize_map()
+        image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
+        im = Image.fromarray(image)
+        w = int(im.width * self.scale)
+        h = int(im.height * self.scale)
+        img = im.resize((w, h), Image.ANTIALIAS)
+        self.canvas_image = ImageTk.PhotoImage(img)
+        self.canvas.itemconfigure(self.imageId, image=self.canvas_image)
 
-    def do_zoom(self, event):  # nie działa
-        factor = 1.001 ** event.delta
-        self.canvas.scale(ALL, event.x, event.y, factor, factor)
+    def do_zoom(self, event):
+        true_x = self.canvas.canvasx(event.x)
+        true_y = self.canvas.canvasy(event.y)
+        print(true_x)
+        print(true_y)
+        tmpScale = 1.0
+        if (event.delta > 0):
+            self.scale *= 1.3
+            tmpScale *= 1.3
+        elif (event.delta < 0):
+            self.scale /= 1.3
+            tmpScale /= 1.3
+        image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
+        im = Image.fromarray(image)
+        w = int(im.width * self.scale)
+        h = int(im.height * self.scale)
+        print(w)
+        img = im.resize((w, h), Image.ANTIALIAS)
+        self.canvas_image = ImageTk.PhotoImage(img)
+        self.canvas.itemconfigure(self.imageId, image=self.canvas_image)
+        self.canvas.scale('all', 0, 0, tmpScale, tmpScale)
+        self.canvas.configure(scrollregion = (0, 0, w, h))
+        
+        
 
     def start_simulation(self):  # działa
         cv2.namedWindow("Map", cv2.WINDOW_NORMAL)
