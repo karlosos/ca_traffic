@@ -32,15 +32,23 @@ if __name__ == "__main__":
     # mp.add_car(pos=Vec2D(49, 1), vel=2)
     # mp.add_car(pos=Vec2D(5, 51))
 
-    # mp = Simulation(50, 50, p=50)
+    test = Simulation(50, 50, p=50)
 
-    # for cell in mp.cellmap[25, :]:
-    #     cell.kind = "road"
-    #     cell.direction.append(Vec2D(0, 1))
-    #
-    # for cell in mp.cellmap[:, 25]:
-    #     cell.kind = "road"
-    #     cell.direction.append(Vec2D(1, 0))
+    for cell in test.cellmap[25, :]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in test.cellmap[:, 25]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in test.cellmap[26, 22:23]:
+        cell.kind = "light"
+
+    for cell in test.cellmap[22, 24:25]:
+        cell.kind = "light"
+
+    np.save("cross-section.npy", test.cellmap)
     #
     # mp.cellmap = np.load("cross-section.npy", allow_pickle=True)
     # mp.add_car(pos=Vec2D(25, 5))

@@ -302,6 +302,8 @@ class GUI:
             if len(self.model_preview.cars) < 20:
                 self.model_preview.add_car()
             self.model_preview.step()
+            # self.model_preview.change_light()
+            # print(self.model_preview.jajebie)
             self.model_preview.print_map("Map")
             k = cv2.waitKey(50)
             if k == 27:

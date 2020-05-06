@@ -1,4 +1,6 @@
 import cv2
+
+from Lights import Lights
 from car import Car
 import numpy as np
 from resizer import fit
@@ -8,7 +10,7 @@ from Vec2D import Vec2D
 
 
 class Simulation:
-    def __init__(self, sizeX, sizeY, p=15, starting_point=None, roadcolor=None, carcolor=None, sidecolor=None, nonecolor=None, slowcolor=None):
+    def __init__(self, sizeX, sizeY, p=15, starting_point=None, roadcolor=None, carcolor=None, sidecolor=None, nonecolor=None, slowcolor=None, lightcolor=None):
         if roadcolor is None:
             roadcolor = [125, 125, 125]
         if carcolor is None:
@@ -19,10 +21,14 @@ class Simulation:
             nonecolor = [255, 255, 255]
         if slowcolor is None:
             slowcolor = [255, 0, 0]
+        if lightcolor is None:
+            lightcolor = [255, 255, 0]
+        self.lightmap = []
         self.cellmap = np.array([list(Cell() for _ in range(sizeX)) for _ in range(sizeY)])
         self.colormap = np.array(np.full([sizeY, sizeX, 3], 255), dtype=np.uint8)
         self.cars = []
         self.probabilityOfTurn = p
+        self.lightcolor = lightcolor
         self.roadcolor = roadcolor
         self.carcolor = carcolor
         self.sidecolor = sidecolor
@@ -35,6 +41,7 @@ class Simulation:
         cv2.imshow(window, image)
 
     def initialize_map(self):  # działa
+        tmpcounter = 14
         for row in range(self.cellmap.shape[0]):
             for col in range(self.cellmap.shape[1]):
                 if self.cellmap[row, col].kind == "road":
@@ -44,6 +51,11 @@ class Simulation:
                         self.colormap[row, col] = self.roadcolor
                 elif self.cellmap[row, col].kind == "side":
                     self.colormap[row, col] = self.sidecolor
+                elif self.cellmap[row, col].kind == "light":
+                    light = Lights(row=row, col=col, state=tmpcounter)
+                    tmpcounter += 14
+                    self.lightmap.append(light)
+                    # self.colormap[row, col] = self.lightcolor
 
     def cellmap_outline_roads(self):  # działa
         for row in range(1, self.cellmap.shape[0] - 1):
@@ -69,6 +81,7 @@ class Simulation:
         toRemove = []
         for car in self.cars:
             for i in range(car.velocity):
+
                 # początek reguł tutaj
                 cell = self.cellmap[car.position.x, car.position.y]
                 if all(dire.equal(Vec2D(0, 0)) for dire in cell.direction) or cell.direction is None:
@@ -78,7 +91,6 @@ class Simulation:
                     break
 
                 direction = car.oldDirection
-
                 if len(cell.direction) == 1:
                     direction = cell.direction[0]
 
@@ -111,9 +123,24 @@ class Simulation:
                 self.colormap[car.position.x, car.position.y] = self.carcolor
                 self.cellmap[car.position.x, car.position.y].car = car
                 car.oldDirection = direction
-
+        self.change_light()
         for cartoremove in toRemove:
             self.cars.remove(cartoremove)
+
+    def change_light(self):
+        for light in self.lightmap:
+            light.state += 1;
+            light.state %= 30;
+
+            if 0 <= light.state < 14:
+                light.color = [255, 0, 0]
+            if 14 <= light.state <= 17:
+                light.color = [255, 165, 0]
+            if 17 < light.state <= 30:
+                light.color = [0, 255, 0]
+
+            self.colormap[light.row, light.col] = light.color
+
 
     def find_starting_point(self):  # działa
         for y in range(int(self.cellmap.shape[1]/2)):
