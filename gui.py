@@ -13,7 +13,7 @@ from copy import deepcopy
 from tkinter import ALL, EventType
 from PIL import ImageTk, Image
 import re
-
+from Cell import Cell
 
 class GUI:
     def __init__(self, master):
@@ -63,9 +63,9 @@ class GUI:
         self.straight_road_entry_direction = tk.Entry(self.master)
         # cars generator
         self.cars_label = tk.Label(self.master, text="Cars")
-        self.cars_label.place(x=400, y=25)
+        self.cars_label.place(x=395, y=25)
         self.cars_entry = tk.Entry(self.master)
-        self.cars_entry.place(x=435, y=25, width=30)
+        self.cars_entry.place(x=430, y=25, width=30)
         # canvas
         self.canvas_relwidth = 0.6
         self.canvas_relheight = 0.7
@@ -81,7 +81,7 @@ class GUI:
                                 background='gray', yscrollcommand=self.canvas_vertical_scroll,
                                 xscrollcommand=self.canvas_horizontal_scroll,
                                 scrollregion=(0, 0, self.model_preview.cellmap.shape[1],
-                                              self.model_preview.cellmap.shape[0]))
+                                              self.model_preview.cellmap.shape[0]))           
         self.canvas_vertical_scroll.config(command=self.canvas.yview)
         self.canvas_horizontal_scroll.config(command=self.canvas.xview)
         self.canvas_vertical_scroll.place(x=275, y=75, relheight=self.canvas_relheight)
@@ -93,7 +93,22 @@ class GUI:
         self.canvas.bind("<Motion>", self.mouse_over_canvas)
         self.canvas.bind("<Leave>", self.mouse_leaves_canvas)
         self.start_button = tk.Button(master=self.master, text="Start simulation", command=self.start_simulation)
-        self.start_button.place(x=490, y=20)
+        self.start_button.place(x=470, y=20)
+        # resize map
+        self.resize_map_Label = tk.Label(self.master, text = "Resize map")
+        self.resize_map_Label.place(x=590, y=25)
+        self.resize_map_Label_X = tk.Label(self.master, text = "x")
+        self.resize_map_Label_X.place(x=660, y=25)
+        self.resize_map_Entry_X = tk.Entry(self.master)
+        self.resize_map_Entry_X.insert(0,str(len(self.model_preview.cellmap)))
+        self.resize_map_Entry_X.place(x=675, y=25, width=30, height=20)
+        self.resize_map_Label_Y = tk.Label(self.master, text = "y")
+        self.resize_map_Label_Y.place(x=715, y=25)
+        self.resize_map_Entry_Y = tk.Entry(self.master)
+        self.resize_map_Entry_Y.insert(0,str(len(self.model_preview.cellmap[0])))
+        self.resize_map_Entry_Y.place(x=730, y=25, width=30, height=20)
+        self.resize_map_Button = tk.Button(master=self.master, text="Resize Map", command=self.resize_map)
+        self.resize_map_Button.place(x=770, y=20)
 
     def generate_straight_road(self):
         try:
@@ -317,3 +332,41 @@ class GUI:
                     if k == 27:
                         cv2.destroyAllWindows()
                         break
+       
+    def resize_map(self):
+        x = int(self.resize_map_Entry_X.get())
+        y = int(self.resize_map_Entry_Y.get())
+        if (x != len(self.model_preview.cellmap) ) or (y != len(self.model_preview.cellmap[0])):            
+            self.canvas.configure(width=x, height=y, scrollregion=(0, 0, y, x ))
+            if x < len(self.model_preview.cellmap):
+                self.model_preview.cellmap = self.model_preview.cellmap[0:x,:]
+                self.model_preview.colormap = self.model_preview.colormap[0:x,:,:]
+            elif x > len(self.model_preview.cellmap):
+                toAdd = x - len(self.model_preview.cellmap)
+                row_to_be_added = np.array([list(Cell() for i in range(len(self.model_preview.cellmap))) for j in range(toAdd)])        
+                result = np.vstack ((self.model_preview.cellmap, row_to_be_added) )
+                self.model_preview.cellmap = result
+                #colormap
+                toAdd = x - len(self.model_preview.colormap)
+                b = np.full([len(self.model_preview.colormap)+toAdd, len(self.model_preview.colormap[0]), 3], 255, dtype=np.uint8)
+                b[:-toAdd:,:,] = self.model_preview.colormap
+                self.model_preview.colormap = b 
+            if y < len(self.model_preview.cellmap[0]):
+                self.model_preview.cellmap = self.model_preview.cellmap[:,0:y]
+                self.model_preview.colormap = self.model_preview.colormap[:,0:y,:]
+            elif y > len(self.model_preview.cellmap[0]):
+                toAdd = y - len(self.model_preview.cellmap[0])
+                column_to_be_added = np.array([list(Cell() for i in range(toAdd)) for j in range(len(self.model_preview.cellmap))])     
+                result = np.column_stack((self.model_preview.cellmap, column_to_be_added)) 
+                self.model_preview.cellmap = result
+                #colormap
+                toAdd = y - len(self.model_preview.colormap[0])
+                b = np.full([len(self.model_preview.colormap), len(self.model_preview.colormap[0])+toAdd, 3], 255, dtype=np.uint8)
+                b[:,:-toAdd:,] = self.model_preview.colormap
+                self.model_preview.colormap = b 
+        else:
+            return                    
+
+
+
+
