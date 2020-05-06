@@ -12,6 +12,7 @@ from resizer import fit_tk, array_to_tk
 from copy import deepcopy
 from tkinter import ALL, EventType
 from PIL import ImageTk, Image
+import re
 
 
 class GUI:
@@ -60,6 +61,11 @@ class GUI:
                                                        command=self.generate_straight_road)
         self.straight_road_direction_label = tk.Label(self.master, text="Direction")
         self.straight_road_entry_direction = tk.Entry(self.master)
+        # cars generator
+        self.cars_label = tk.Label(self.master, text="Cars")
+        self.cars_label.place(x=425, y=25)
+        self.cars_entry = tk.Entry(self.master)
+        self.cars_entry.place(x=460, y=25)
         # canvas
         self.canvas_relwidth = 0.6
         self.canvas_relheight = 0.7
@@ -87,7 +93,7 @@ class GUI:
         self.canvas.bind("<Motion>", self.mouse_over_canvas)
         self.canvas.bind("<Leave>", self.mouse_leaves_canvas)
         self.start_button = tk.Button(master=self.master, text="Start simulation", command=self.start_simulation)
-        self.start_button.place(x=425, y=20)
+        self.start_button.place(x=625, y=20)
 
     def generate_straight_road(self):
         try:
@@ -260,7 +266,7 @@ class GUI:
         self.canvas.itemconfigure(self.imageId, image=self.canvas_image)
         self.canvas.scale('all', 0, 0, tmpScale, tmpScale)
         self.canvas.configure(scrollregion = (0, 0, w, h))
-        
+
     def mouse_over_canvas(self, event):
         canvas = event.widget
         [part_size_x, part_size_y, _] = self.part_preview.colormap.shape
@@ -274,7 +280,7 @@ class GUI:
         try:
             model_image_crop = model_image[row:row+part_size_x, col:col+part_size_y]
             roads_index = np.logical_not(part_preview_image == self.model_preview.nonecolor)
-            model_image_crop[roads_index] = part_preview_image[roads_index] 
+            model_image_crop[roads_index] = part_preview_image[roads_index]
         except:
             pass
 
@@ -286,24 +292,28 @@ class GUI:
         img = im.resize((w, h), Image.ANTIALIAS)
         self.canvas_image = ImageTk.PhotoImage(img)
         self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
-    
+
     def mouse_leaves_canvas(self, event):
-        return 
+        return
         self.canvas_image = array_to_tk(self.model_preview.colormap)
         self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
-        
+
     def start_simulation(self):  # działa
-        cv2.namedWindow("Map", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("Map", 1280, 800)
-        self.model_preview.cellmap_outline_roads()
-        self.model_preview.initialize_map()
-        self.model_preview.find_starting_point()
-        while True:
-            if len(self.model_preview.cars) < 20:
-                self.model_preview.add_car()
-            self.model_preview.step()
-            self.model_preview.print_map("Map")
-            k = cv2.waitKey(50)
-            if k == 27:
-                cv2.destroyAllWindows()
-                break
+        check_string = self.cars_entry.get()
+        if re.match("^[0-9]+$", check_string):
+            cars_number = int(check_string)
+            if isinstance(cars_number, int) and cars_number > 0:
+                cv2.namedWindow("Map", cv2.WINDOW_NORMAL)
+                cv2.resizeWindow("Map", 1280, 800)
+                self.model_preview.cellmap_outline_roads()
+                self.model_preview.initialize_map()
+                self.model_preview.find_starting_point()
+                while True:
+                    if len(self.model_preview.cars) < cars_number:
+                        self.model_preview.add_car()
+                    self.model_preview.step()
+                    self.model_preview.print_map("Map")
+                    k = cv2.waitKey(50)
+                    if k == 27:
+                        cv2.destroyAllWindows()
+                        break
