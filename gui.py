@@ -63,9 +63,9 @@ class GUI:
         self.straight_road_entry_direction = tk.Entry(self.master)
         # cars generator
         self.cars_label = tk.Label(self.master, text="Cars")
-        self.cars_label.place(x=425, y=25)
+        self.cars_label.place(x=400, y=25)
         self.cars_entry = tk.Entry(self.master)
-        self.cars_entry.place(x=460, y=25)
+        self.cars_entry.place(x=435, y=25, width=30)
         # canvas
         self.canvas_relwidth = 0.6
         self.canvas_relheight = 0.7
@@ -93,7 +93,7 @@ class GUI:
         self.canvas.bind("<Motion>", self.mouse_over_canvas)
         self.canvas.bind("<Leave>", self.mouse_leaves_canvas)
         self.start_button = tk.Button(master=self.master, text="Start simulation", command=self.start_simulation)
-        self.start_button.place(x=625, y=20)
+        self.start_button.place(x=490, y=20)
 
     def generate_straight_road(self):
         try:
