@@ -15,6 +15,7 @@ from PIL import ImageTk, Image
 import re
 from Cell import Cell
 
+
 class GUI:
     def __init__(self, master):
         # main window
@@ -35,7 +36,7 @@ class GUI:
         self.preview_Label.image = self.preview_image
         self.preview_Label.place(x=25, y=50, width=200, height=200)
         # choose part
-        self.currentlychosen = 0
+        self.currentlychosen = -1
         self.preview_scrollbar = tk.Scrollbar(self.master, orient=tk.VERTICAL)
         self.part_options_listbox = tk.Listbox(self.master, selectmode=tk.SINGLE,
                                                yscrollcommand=self.preview_scrollbar.set)
@@ -50,12 +51,13 @@ class GUI:
         self.part_options_listbox.insert(5, "cross-section-T-down")
         self.part_options_listbox.insert(6, "cross-section-T-left")
         self.part_options_listbox.insert(7, "cross-section-T-right")
+        self.part_options_listbox.insert(8, "eraser")
         self.load_button = tk.Button(master=self.master, text="Load model", command=self.load_part)
         self.load_button.place(x=25, y=310)
         # straight road generation
         self.straight_road_width_label = tk.Label(self.master, text="Width")
         self.straight_road_length_label = tk.Label(self.master, text="Length")
-        self.straight_road_entry_width = tk.Entry(self.master)
+        self.straight_road_entry_width = tk.Entry(self.master)  # reused for eraser
         self.straight_road_entry_length = tk.Entry(self.master)
         self.straight_road_generate_button = tk.Button(self.master, text="Generate road",
                                                        command=self.generate_straight_road)
@@ -66,6 +68,7 @@ class GUI:
         self.cars_label.place(x=395, y=25)
         self.cars_entry = tk.Entry(self.master)
         self.cars_entry.place(x=430, y=25, width=30)
+        self.cars_entry.insert(0,"20")
         # canvas
         self.canvas_relwidth = 0.6
         self.canvas_relheight = 0.7
@@ -109,6 +112,8 @@ class GUI:
         self.resize_map_Entry_Y.place(x=730, y=25, width=30, height=20)
         self.resize_map_Button = tk.Button(master=self.master, text="Resize Map", command=self.resize_map)
         self.resize_map_Button.place(x=770, y=20)
+        # eraser
+        self.eraser_resize_button = tk.Button(master=self.master, text="Resize eraser", command=self.resize_eraser)
 
     def generate_straight_road(self):
         try:
@@ -165,14 +170,16 @@ class GUI:
     def load_part(self):  # działa
         self.currentlychosen = self.part_options_listbox.curselection()[0]
         if self.currentlychosen != 0:
-            self.straight_road_width_label.place_forget()
-            self.straight_road_entry_width.place_forget()
+            if self.currentlychosen != 8:
+                self.straight_road_width_label.place_forget()
+                self.straight_road_entry_width.place_forget()
+                self.straight_road_entry_width.delete(0, 'end')
+                self.eraser_resize_button.place_forget()
             self.straight_road_length_label.place_forget()
             self.straight_road_entry_length.place_forget()
             self.straight_road_direction_label.place_forget()
             self.straight_road_entry_direction.place_forget()
             self.straight_road_entry_length.delete(0, 'end')
-            self.straight_road_entry_width.delete(0, 'end')
             self.straight_road_entry_direction.delete(0, 'end')
         if self.currentlychosen == 0:
             self.part_preview = Simulation(1, 1)
@@ -223,32 +230,51 @@ class GUI:
             self.part_preview = Simulation(array.shape[0], array.shape[1])
             self.part_preview.cellmap = array
             self.make_preview()
+        elif self.currentlychosen == 8:
+            self.straight_road_width_label.place(x=25, y=350)
+            self.straight_road_entry_width.place(x=100, y=350, width=50, height=25)
+            self.straight_road_entry_width.insert(0, "50")
+            self.part_preview = Simulation(int(self.straight_road_entry_width.get()),
+                                           int(self.straight_road_entry_width.get()))
+            self.make_preview()
+            self.eraser_resize_button.place(x=160, y=350, width=75, height=25)
 
     def place_part(self, event):
         canvas = event.widget
         row = int(canvas.canvasy(event.y)/self.scale)
         col = int(canvas.canvasx(event.x)/self.scale)
-        if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
-            row - int(self.part_preview.cellmap.shape[1]/2) < 0:
-            msg.showerror("Part won't fit vertically")
-            return
-        if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
-            col - int(self.part_preview.cellmap.shape[0]/2) < 0:
-            msg.showerror("Part won't fit horizontally")
-            return
-        part_preview = deepcopy(self.part_preview)
+        if self.currentlychosen == 8:
+            for y in range(0 if 0 > col-int(self.part_preview.cellmap.shape[0]/2) else col-int(self.part_preview.cellmap.shape[0]/2),
+                           self.model_preview.cellmap.shape[0] if self.model_preview.cellmap.shape[0] <
+                                                                  col+int(self.part_preview.cellmap.shape[0]/2)
+                                                               else col+int(self.part_preview.cellmap.shape[0]/2)):
+                for x in range(0 if 0 > row-int(self.part_preview.cellmap.shape[1]/2) else row-int(self.part_preview.cellmap.shape[1]/2),
+                               self.model_preview.cellmap.shape[1] if self.model_preview.cellmap.shape[1] <
+                               row+int(self.part_preview.cellmap.shape[1]/2) else row+int(self.part_preview.cellmap.shape[1]/2)):
+                    self.model_preview.cellmap[x, y] = Cell()
+                    self.model_preview.colormap[x, y] = self.model_preview.nonecolor
+        else:
+            if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
+                        row - int(self.part_preview.cellmap.shape[1]/2) < 0:
+                msg.showerror("Part won't fit vertically")
+                return
+            if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
+                col - int(self.part_preview.cellmap.shape[0]/2) < 0:
+                msg.showerror("Part won't fit horizontally")
+                return
+            part_preview = deepcopy(self.part_preview)
 
-        for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(part_preview.cellmap.shape[1]/2)):
-            for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
-                modelcell = self.model_preview.cellmap[x, y]
-                partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
-                if modelcell.kind is None and partcell.kind is not None:
-                    self.model_preview.cellmap[x, y] = partcell
-                    self.model_preview.colormap[x, y] = self.model_preview.roadcolor
-                elif modelcell.kind == "road" and partcell.kind == "road":
-                    for dire in partcell.direction:
-                        if not any(dire.equal(direc) for direc in modelcell.direction):
-                            self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
+            for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(part_preview.cellmap.shape[1]/2)):
+                for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
+                    modelcell = self.model_preview.cellmap[x, y]
+                    partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
+                    if modelcell.kind is None and partcell.kind is not None:
+                        self.model_preview.cellmap[x, y] = partcell
+                        self.model_preview.colormap[x, y] = self.model_preview.roadcolor
+                    elif modelcell.kind == "road" and partcell.kind == "road":
+                        for dire in partcell.direction:
+                            if not any(dire.equal(direc) for direc in modelcell.direction):
+                                self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
 
         self.model_preview.initialize_map()
         image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
@@ -367,6 +393,18 @@ class GUI:
         else:
             return                    
 
+    def resize_eraser(self):
+        try:
+            width = int(self.straight_road_entry_width.get())
+            assert self.model_preview.cellmap.shape[0] > width > 0 and width < self.model_preview.cellmap.shape[1], \
+                msg.showerror("Error", "Incorrect width")
+            self.part_preview = Simulation(width, width)
 
+        except ValueError:
+            msg.showerror("Error", "Width must be an integer")
+            return
+
+        except AssertionError:
+            return
 
 
