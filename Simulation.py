@@ -2,7 +2,7 @@ import cv2
 from car import Car
 import numpy as np
 from resizer import fit
-from random import randrange
+from random import randrange, choice
 from Cell import Cell
 from Vec2D import Vec2D
 
@@ -28,10 +28,18 @@ class Simulation:
         self.sidecolor = sidecolor
         self.nonecolor = nonecolor
         self.slowcolor = slowcolor
-        self.starting_point = starting_point
+        self.slow_cars = 0
+        self.max_slow_cars = 0
+        if starting_point is None:
+            self.starting_point = []
 
     def print_map(self, window):  # działa
-        image = cv2.cvtColor(self.colormap, cv2.COLOR_BGR2RGB)
+        text = "Cars not driving at full speed: "+str(self.slow_cars)+", "+"greatest traffic jam: " + \
+               str(self.max_slow_cars)
+        windowWidth = cv2.getWindowImageRect(window)[2]
+        windowHeight = cv2.getWindowImageRect(window)[3]
+        image = cv2.resize(cv2.cvtColor(self.colormap, cv2.COLOR_BGR2RGB), (windowWidth, windowHeight))
+        cv2.putText(image, text, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
         cv2.imshow(window, image)
 
     def initialize_map(self):  # działa
@@ -56,17 +64,18 @@ class Simulation:
 
     def add_car(self, pos=None, vel=1):
         if pos is None:
-            pos = self.starting_point
+            pos = choice(self.starting_point)
         else:
             assert 0 <= pos.x < self.cellmap.shape[0] and 0 <= pos.y < self.cellmap.shape[1], "Invalid position"
             assert self.cellmap[pos.x, pos.y].kind == "road", "Position is not a road"
         assert 0 < vel < 5, "Invalid velocity"
-        car = Car(position=pos, velocity=vel)
+        car = Car(position=pos, velocity=choice([1, 2, 3, 4]))
         self.cellmap[pos.x, pos.y].car = car
         self.cars.append(car)
 
     def step(self):  # działa
         toRemove = []
+        self.slow_cars = 0
         for car in self.cars:
             for i in range(car.velocity):
                 # początek reguł tutaj
@@ -100,6 +109,9 @@ class Simulation:
                 if self.cellmap[newpos.x, newpos.y].car is not None:
                     car.velocity = self.cellmap[newpos.x, newpos.y].car.velocity
                     self.colormap[car.position.x, car.position.y] = self.slowcolor
+                    self.slow_cars += 1
+                    if self.slow_cars > self.max_slow_cars:
+                        self.max_slow_cars = self.slow_cars
                     break
                 else:
                     car.velocity = car.defaultvelocity
@@ -116,17 +128,36 @@ class Simulation:
             self.cars.remove(cartoremove)
 
     def find_starting_point(self):  # działa
+        points_found = [False, False, False, False]
         for y in range(int(self.cellmap.shape[1]/2)):
+            if points_found[0] and points_found[1]:
+                break
             for x in range(self.cellmap.shape[0]):
                 for direc in self.cellmap[x, y].direction:
-                    if direc.equal(Vec2D(0, 1)) and self.cellmap[x, y].kind == "road":
-                        self.starting_point = Vec2D(x, y)
-                        return
-                for direc in self.cellmap[x, -y].direction:
-                    if direc.equal(Vec2D(0, -1)) and self.cellmap[x, -y].kind == "road":
-                        self.starting_point = Vec2D(x, -y)
-                        return
+                    if direc.equal(Vec2D(0, 1)) and self.cellmap[x, y].kind == "road" and points_found[0] is False:
+                        self.starting_point.append(Vec2D(x, y))
+                        points_found[0] = True
+                        break
+                for direc in self.cellmap[x, -y-1].direction:
+                    if direc.equal(Vec2D(0, -1)) and self.cellmap[x, -y-1].kind == "road" and points_found[1] is False:
+                        self.starting_point.append(Vec2D(x, self.cellmap.shape[1]-y-1))
+                        points_found[1] = True
+                        break
 
+        for x in range(int(self.cellmap.shape[0]/2)):
+            if points_found[2] and points_found[3]:
+                break
+            for y in range(self.cellmap.shape[1]):
+                for direc in self.cellmap[x, y].direction:
+                    if direc.equal(Vec2D(1, 0)) and self.cellmap[x, y].kind == "road" and points_found[2] is False:
+                        self.starting_point.append(Vec2D(x, y))
+                        points_found[2] = True
+                        break
+                for direc in self.cellmap[-x-1, y].direction:
+                    if direc.equal(Vec2D(-1, 0)) and self.cellmap[-x-1, y].kind == "road" and points_found[3] is False:
+                        self.starting_point.append(Vec2D(self.cellmap.shape[0]-x-1, y))
+                        points_found[3] = True
+                        break
 
 
 
