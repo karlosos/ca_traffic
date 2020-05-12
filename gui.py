@@ -1,7 +1,9 @@
 import tkinter as tk
 import tkinter.messagebox as msg
 from math import floor, ceil
-from tkinter import ALL
+import os
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 import cv2
 import numpy as np
@@ -10,10 +12,11 @@ from Simulation import Simulation
 from Vec2D import Vec2D
 from resizer import fit_tk, array_to_tk
 from copy import deepcopy
-from tkinter import ALL, EventType
 from PIL import ImageTk, Image
 import re
 from Cell import Cell
+from MeasurmentFlag import MeasurmentFlag
+from datetime import datetime
 
 
 class GUI:
@@ -52,12 +55,13 @@ class GUI:
         self.part_options_listbox.insert(6, "cross-section-T-left")
         self.part_options_listbox.insert(7, "cross-section-T-right")
         self.part_options_listbox.insert(8, "eraser")
+        self.part_options_listbox.insert(9, "Measuring-flag")
         self.load_button = tk.Button(master=self.master, text="Load model", command=self.load_part)
         self.load_button.place(x=25, y=310)
         # straight road generation
         self.straight_road_width_label = tk.Label(self.master, text="Width")
         self.straight_road_length_label = tk.Label(self.master, text="Length")
-        self.straight_road_entry_width = tk.Entry(self.master)  # reused for eraser
+        self.straight_road_entry_width = tk.Entry(self.master)  # reused for eraser and measurment flag
         self.straight_road_entry_length = tk.Entry(self.master)
         self.straight_road_generate_button = tk.Button(self.master, text="Generate road",
                                                        command=self.generate_straight_road)
@@ -98,22 +102,24 @@ class GUI:
         self.start_button = tk.Button(master=self.master, text="Start simulation", command=self.start_simulation)
         self.start_button.place(x=470, y=20)
         # resize map
-        self.resize_map_Label = tk.Label(self.master, text = "Resize map")
+        self.resize_map_Label = tk.Label(self.master, text="Resize map")
         self.resize_map_Label.place(x=590, y=25)
-        self.resize_map_Label_X = tk.Label(self.master, text = "x")
+        self.resize_map_Label_X = tk.Label(self.master, text="x")
         self.resize_map_Label_X.place(x=660, y=25)
         self.resize_map_Entry_X = tk.Entry(self.master)
         self.resize_map_Entry_X.insert(0,str(len(self.model_preview.cellmap)))
         self.resize_map_Entry_X.place(x=675, y=25, width=30, height=20)
-        self.resize_map_Label_Y = tk.Label(self.master, text = "y")
+        self.resize_map_Label_Y = tk.Label(self.master, text="y")
         self.resize_map_Label_Y.place(x=715, y=25)
         self.resize_map_Entry_Y = tk.Entry(self.master)
         self.resize_map_Entry_Y.insert(0,str(len(self.model_preview.cellmap[0])))
         self.resize_map_Entry_Y.place(x=730, y=25, width=30, height=20)
         self.resize_map_Button = tk.Button(master=self.master, text="Resize Map", command=self.resize_map)
         self.resize_map_Button.place(x=770, y=20)
-        # eraser
-        self.eraser_resize_button = tk.Button(master=self.master, text="Resize eraser", command=self.resize_eraser)
+        # eraser and measurment flag
+        self.eraser_resize_button = tk.Button(master=self.master, text="Resize tool", command=self.resize_eraser)  # reused for measurment flag
+        self.measurment_flags = []
+        self.flagcolor = [0, 255, 255]
 
     def generate_straight_road(self):
         try:
@@ -162,15 +168,15 @@ class GUI:
 
     def make_preview(self):  # działa
         self.part_preview.initialize_map()
-        image = cv2.cvtColor(self.part_preview.colormap, cv2.COLOR_BGR2RGB)
-        f = fit_tk(image, self.preview_Label.winfo_width(), self.preview_Label.winfo_height())
+        # image = cv2.cvtColor(self.part_preview.colormap, cv2.COLOR_BGR2RGB)
+        f = fit_tk(self.part_preview.colormap, self.preview_Label.winfo_width(), self.preview_Label.winfo_height())
         self.preview_Label.configure(image=f)
         self.preview_Label.image = f
 
     def load_part(self):  # działa
         self.currentlychosen = self.part_options_listbox.curselection()[0]
         if self.currentlychosen != 0:
-            if self.currentlychosen != 8:
+            if self.currentlychosen != 8 and self.currentlychosen != 9:
                 self.straight_road_width_label.place_forget()
                 self.straight_road_entry_width.place_forget()
                 self.straight_road_entry_width.delete(0, 'end')
@@ -238,6 +244,15 @@ class GUI:
                                            int(self.straight_road_entry_width.get()))
             self.make_preview()
             self.eraser_resize_button.place(x=160, y=350, width=75, height=25)
+        elif self.currentlychosen == 9:
+            self.straight_road_width_label.place(x=25, y=350)
+            self.straight_road_entry_width.place(x=100, y=350, width=50, height=25)
+            self.straight_road_entry_width.insert(0, "50")
+            self.part_preview = Simulation(int(self.straight_road_entry_width.get()),
+                                           int(self.straight_road_entry_width.get()))
+            self.part_preview.colormap[:, :] = self.flagcolor
+            self.make_preview()
+            self.eraser_resize_button.place(x=160, y=350, width=75, height=25)
 
     def place_part(self, event):
         canvas = event.widget
@@ -253,6 +268,23 @@ class GUI:
                                row+int(self.part_preview.cellmap.shape[1]/2) else row+int(self.part_preview.cellmap.shape[1]/2)):
                     self.model_preview.cellmap[x, y] = Cell()
                     self.model_preview.colormap[x, y] = self.model_preview.nonecolor
+        elif self.currentlychosen == 9:
+            if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
+                        row - int(self.part_preview.cellmap.shape[1]/2) < 0:
+                msg.showerror("Flag won't fit vertically")
+                return
+            if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
+                col - int(self.part_preview.cellmap.shape[0]/2) < 0:
+                msg.showerror("Flag won't fit horizontally")
+                return
+
+            self.measurment_flags.append(MeasurmentFlag(Vec2D(row, col), int(self.straight_road_entry_width.get())))
+
+            for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(self.part_preview.cellmap.shape[1]/2)):
+                for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(self.part_preview.cellmap.shape[0]/2)):
+                    if np.array_equal(self.model_preview.colormap[x, y], self.model_preview.nonecolor):
+                        self.model_preview.colormap[x, y] = self.flagcolor
+            return
         else:
             if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
                         row - int(self.part_preview.cellmap.shape[1]/2) < 0:
@@ -277,8 +309,8 @@ class GUI:
                                 self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
 
         self.model_preview.initialize_map()
-        image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
-        im = Image.fromarray(image)
+        # image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
+        im = Image.fromarray(self.model_preview.colormap)
         w = int(im.width * self.scale)
         h = int(im.height * self.scale)
         img = im.resize((w, h), Image.ANTIALIAS)
@@ -288,25 +320,22 @@ class GUI:
     def do_zoom(self, event):
         true_x = self.canvas.canvasx(event.x)
         true_y = self.canvas.canvasy(event.y)
-        print(true_x)
-        print(true_y)
         tmpScale = 1.0
-        if (event.delta > 0):
+        if event.delta > 0:
             self.scale *= 1.3
             tmpScale *= 1.3
-        elif (event.delta < 0):
+        elif event.delta < 0:
             self.scale /= 1.3
             tmpScale /= 1.3
-        image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
-        im = Image.fromarray(image)
+        # image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
+        im = Image.fromarray(self.model_preview.colormap)
         w = int(im.width * self.scale)
         h = int(im.height * self.scale)
-        print(w)
         img = im.resize((w, h), Image.NEAREST)
         self.canvas_image = ImageTk.PhotoImage(img)
         self.canvas.itemconfigure(self.imageId, image=self.canvas_image)
         self.canvas.scale('all', 0, 0, tmpScale, tmpScale)
-        self.canvas.configure(scrollregion = (0, 0, w, h))
+        self.canvas.configure(scrollregion=(0, 0, w, h))
 
     def mouse_over_canvas(self, event):
         canvas = event.widget
@@ -336,8 +365,6 @@ class GUI:
 
     def mouse_leaves_canvas(self, event):
         return
-        self.canvas_image = array_to_tk(self.model_preview.colormap)
-        self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
 
     def start_simulation(self):  # działa
         check_string = self.cars_entry.get()
@@ -349,46 +376,83 @@ class GUI:
                 self.model_preview.cellmap_outline_roads()
                 self.model_preview.initialize_map()
                 self.model_preview.find_starting_point()
+                datavecs = []
+                file_handles = []
+                axes = []
+                # fig = plt.figure()
+                n_vecs = len(self.measurment_flags)
+                if n_vecs > 0:
+                    # plt.show()
+                    now = datetime.now()
+                    dt_string = now.strftime("%d-%m-%Y %H;%M;%S")
+                    try:
+                        # Create target Directory
+                        os.mkdir("Measurements\\"+dt_string)
+                    except FileExistsError:
+                        pass
+                    for i in range(n_vecs):
+                        # axes.append(fig.add_subplot(n_vecs, 1, i+1))
+                        vec = list([0 for _ in range(100)])
+                        datavecs.append(vec)
+                        file_handles.append(open("Measurements\\" + dt_string + "\\" + str(i) + ".csv", "a"))  # append only write mode
                 while True:
                     if len(self.model_preview.cars) < cars_number:
                         self.model_preview.add_car()
                     self.model_preview.step()
                     self.model_preview.print_map("Map")
+                    if n_vecs > 0:
+                        for i in range(n_vecs):
+                            n_slow = 0
+                            flag = self.measurment_flags[i]
+                            for row in self.model_preview.colormap[flag.pos.x - int(flag.size/2): flag.pos.x + int(flag.size/2), flag.pos.y - int(flag.size/2): flag.pos.y + int(flag.size/2)]:
+                                for color in row:
+                                    if np.array_equal(color, self.part_preview.slowcolor):
+                                        n_slow += 1
+                            file_handles[i].write(str(n_slow)+", ")
+                            datavecs[i].pop(0)
+                            datavecs[i].append(n_slow)
+                            # axes[i].clear()
+                            # axes[i].plot(datavecs[i])
+                        # plt.pause(0.05)
+
                     k = cv2.waitKey(50)
                     if k == 27:
                         cv2.destroyAllWindows()
                         break
+
+                for i in range(n_vecs):
+                    file_handles[i].close()
        
     def resize_map(self):
         x = int(self.resize_map_Entry_X.get())
         y = int(self.resize_map_Entry_Y.get())
-        if (x != len(self.model_preview.cellmap) ) or (y != len(self.model_preview.cellmap[0])):            
-            self.canvas.configure(width=x, height=y, scrollregion=(0, 0, y, x ))
+        if (x != len(self.model_preview.cellmap)) or (y != len(self.model_preview.cellmap[0])):
+            self.canvas.configure(width=x, height=y, scrollregion=(0, 0, y, x))
             if x < len(self.model_preview.cellmap):
-                self.model_preview.cellmap = self.model_preview.cellmap[0:x,:]
-                self.model_preview.colormap = self.model_preview.colormap[0:x,:,:]
+                self.model_preview.cellmap = self.model_preview.cellmap[0:x, :]
+                self.model_preview.colormap = self.model_preview.colormap[0:x, :, :]
             elif x > len(self.model_preview.cellmap):
                 toAdd = x - len(self.model_preview.cellmap)
-                row_to_be_added = np.array([list(Cell() for i in range(len(self.model_preview.cellmap))) for j in range(toAdd)])        
-                result = np.vstack ((self.model_preview.cellmap, row_to_be_added) )
+                row_to_be_added = np.array([list(Cell() for _ in range(len(self.model_preview.cellmap))) for _ in range(toAdd)])
+                result = np.vstack((self.model_preview.cellmap, row_to_be_added))
                 self.model_preview.cellmap = result
-                #colormap
+                # colormap
                 toAdd = x - len(self.model_preview.colormap)
                 b = np.full([len(self.model_preview.colormap)+toAdd, len(self.model_preview.colormap[0]), 3], 255, dtype=np.uint8)
-                b[:-toAdd:,:,] = self.model_preview.colormap
+                b[:-toAdd:, :, ] = self.model_preview.colormap
                 self.model_preview.colormap = b 
             if y < len(self.model_preview.cellmap[0]):
-                self.model_preview.cellmap = self.model_preview.cellmap[:,0:y]
-                self.model_preview.colormap = self.model_preview.colormap[:,0:y,:]
+                self.model_preview.cellmap = self.model_preview.cellmap[:, 0:y]
+                self.model_preview.colormap = self.model_preview.colormap[:, 0:y, :]
             elif y > len(self.model_preview.cellmap[0]):
                 toAdd = y - len(self.model_preview.cellmap[0])
-                column_to_be_added = np.array([list(Cell() for i in range(toAdd)) for j in range(len(self.model_preview.cellmap))])     
+                column_to_be_added = np.array([list(Cell() for _ in range(toAdd)) for _ in range(len(self.model_preview.cellmap))])
                 result = np.column_stack((self.model_preview.cellmap, column_to_be_added)) 
                 self.model_preview.cellmap = result
-                #colormap
+                # colormap
                 toAdd = y - len(self.model_preview.colormap[0])
                 b = np.full([len(self.model_preview.colormap), len(self.model_preview.colormap[0])+toAdd, 3], 255, dtype=np.uint8)
-                b[:,:-toAdd:,] = self.model_preview.colormap
+                b[:, :-toAdd:, ] = self.model_preview.colormap
                 self.model_preview.colormap = b 
         else:
             return                    
@@ -399,6 +463,8 @@ class GUI:
             assert self.model_preview.cellmap.shape[0] > width > 0 and width < self.model_preview.cellmap.shape[1], \
                 msg.showerror("Error", "Incorrect width")
             self.part_preview = Simulation(width, width)
+            if self.currentlychosen == 9:
+                self.part_preview.colormap[:, :] = self.flagcolor
 
         except ValueError:
             msg.showerror("Error", "Width must be an integer")
