@@ -1,7 +1,6 @@
 import cv2
 from car import Car
 import numpy as np
-from resizer import fit
 from random import randrange, choice
 from Cell import Cell
 from Vec2D import Vec2D
@@ -34,7 +33,7 @@ class Simulation:
             self.starting_point = []
 
     def print_map(self, window):  # działa
-        text = "Cars not driving at full speed: "+str(self.slow_cars)+", "+"greatest traffic jam: " + \
+        text = "Global traffic jam: "+str(self.slow_cars)+", "+"greatest global traffic jam: " + \
                str(self.max_slow_cars)
         windowWidth = cv2.getWindowImageRect(window)[2]
         windowHeight = cv2.getWindowImageRect(window)[3]

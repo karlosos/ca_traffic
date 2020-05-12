@@ -1,3 +1,4 @@
+matplotlib
 asgiref==3.2.7
 Django==3.0.5
 image==1.5.31
