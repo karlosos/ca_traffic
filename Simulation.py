@@ -9,15 +9,15 @@ from Vec2D import Vec2D
 class Simulation:
     def __init__(self, sizeX, sizeY, p=15, starting_point=None, roadcolor=None, carcolor=None, sidecolor=None, nonecolor=None, slowcolor=None):
         if roadcolor is None:
-            roadcolor = [125, 125, 125]
+            roadcolor = np.array([125, 125, 125], dtype=np.uint8)
         if carcolor is None:
-            carcolor = [0, 255, 0]
+            carcolor = np.array([0, 255, 0], dtype=np.uint8)
         if sidecolor is None:
-            sidecolor = [0, 0, 0]
+            sidecolor = np.array([0, 0, 0], dtype=np.uint8)
         if nonecolor is None:
-            nonecolor = [255, 255, 255]
+            nonecolor = np.array([255, 255, 255], dtype=np.uint8)
         if slowcolor is None:
-            slowcolor = [255, 0, 0]
+            slowcolor = np.array([255, 0, 0], dtype=np.uint8)
         self.cellmap = np.array([list(Cell() for _ in range(sizeX)) for _ in range(sizeY)])
         self.colormap = np.array(np.full([sizeY, sizeX, 3], 255), dtype=np.uint8)
         self.cars = []

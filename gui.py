@@ -404,13 +404,11 @@ class GUI:
                         for i in range(n_vecs):
                             n_slow = 0
                             flag = self.measurment_flags[i]
-                            for row in self.model_preview.colormap[flag.pos.x - int(flag.size/2): flag.pos.x + int(flag.size/2), flag.pos.y - int(flag.size/2): flag.pos.y + int(flag.size/2)]:
-                                for color in row:
-                                    if np.array_equal(color, self.part_preview.slowcolor):
-                                        n_slow += 1
+                            n_slow = np.sum(np.all(self.model_preview.colormap[flag.pos.x - int(flag.size/2): flag.pos.x + int(flag.size/2),
+                                         flag.pos.y - int(flag.size/2): flag.pos.y + int(flag.size/2)] == self.model_preview.slowcolor, axis=2))
                             file_handles[i].write(str(n_slow)+", ")
-                            datavecs[i].pop(0)
-                            datavecs[i].append(n_slow)
+                            # datavecs[i].pop(0)
+                            # datavecs[i].append(n_slow)
                             # axes[i].clear()
                             # axes[i].plot(datavecs[i])
                         # plt.pause(0.05)
