@@ -4,6 +4,8 @@ import numpy as np
 from random import randrange, choice
 from Cell import Cell
 from Vec2D import Vec2D
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 class Simulation:
@@ -151,10 +153,15 @@ class Simulation:
             self.starting_point.remove(pos)
 
     def print_heatmap(self):
-        heatmap = np.zeros_like(self.cellmap)
+        heatmap = np.zeros_like(self.cellmap, dtype=np.uint16)
         for x in range(heatmap.shape[0]):
             for y in range(heatmap.shape[1]):
                 heatmap[x, y] = self.cellmap[x, y].visited
+        plt.subplot(121)
+        sns.heatmap(heatmap)
+        plt.subplot(122)
+        plt.imshow(self.colormap, aspect="auto")
+        plt.show()
 
 
 
