@@ -2,14 +2,11 @@ import tkinter as tk
 import tkinter.messagebox as msg
 from math import floor, ceil
 import os
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
 import cv2
 import numpy as np
 
 from Simulation import Simulation
-from Vec2D import Vec2D
 from resizer import fit_tk, array_to_tk
 from copy import deepcopy
 from PIL import ImageTk, Image
@@ -17,6 +14,7 @@ import re
 from Cell import Cell
 from MeasurmentFlag import MeasurmentFlag
 from datetime import datetime
+from creator import *
 
 
 class GUI:
@@ -72,7 +70,7 @@ class GUI:
         self.cars_label.place(x=395, y=25)
         self.cars_entry = tk.Entry(self.master)
         self.cars_entry.place(x=430, y=25, width=30)
-        self.cars_entry.insert(0,"20")
+        self.cars_entry.insert(0, "20")
         # canvas
         self.canvas_relwidth = 0.6
         self.canvas_relheight = 0.7
@@ -202,39 +200,32 @@ class GUI:
             self.straight_road_generate_button.place(x=175, y=400)
 
         elif self.currentlychosen == 1:
-            array = np.load("cross-section.npy", allow_pickle=True)
-            self.part_preview = Simulation(array.shape[0], array.shape[1])
-            self.part_preview.cellmap = array
+            self.part_preview = Simulation(50, 50)
+            create_cross_section(self.part_preview)
             self.make_preview()
         elif self.currentlychosen == 2:
-            array = np.load("cross-section-X.npy", allow_pickle=True)
-            self.part_preview = Simulation(array.shape[0], array.shape[1])
-            self.part_preview.cellmap = array
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_x(self.part_preview)
             self.make_preview()
         elif self.currentlychosen == 3:
-            array = np.load("traffic-circle.npy", allow_pickle=True)
-            self.part_preview = Simulation(array.shape[0], array.shape[1])
-            self.part_preview.cellmap = array
+            self.part_preview = Simulation(50, 50)
+            create_roundabout(self.part_preview)
             self.make_preview()
         elif self.currentlychosen == 4:
-            array = np.load("cross-section-T-up.npy", allow_pickle=True)
-            self.part_preview = Simulation(array.shape[0], array.shape[1])
-            self.part_preview.cellmap = array
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_t_up(self.part_preview)
             self.make_preview()
         elif self.currentlychosen == 5:
-            array = np.load("cross-section-T-down.npy", allow_pickle=True)
-            self.part_preview = Simulation(array.shape[0], array.shape[1])
-            self.part_preview.cellmap = array
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_t_down(self.part_preview)
             self.make_preview()
         elif self.currentlychosen == 6:
-            array = np.load("cross-section-T-left.npy", allow_pickle=True)
-            self.part_preview = Simulation(array.shape[0], array.shape[1])
-            self.part_preview.cellmap = array
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_t_left(self.part_preview)
             self.make_preview()
         elif self.currentlychosen == 7:
-            array = np.load("cross-section-T-right.npy", allow_pickle=True)
-            self.part_preview = Simulation(array.shape[0], array.shape[1])
-            self.part_preview.cellmap = array
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_t_right(self.part_preview)
             self.make_preview()
         elif self.currentlychosen == 8:
             self.straight_road_width_label.place(x=25, y=350)
@@ -402,7 +393,6 @@ class GUI:
                     self.model_preview.print_map("Map")
                     if n_vecs > 0:
                         for i in range(n_vecs):
-                            n_slow = 0
                             flag = self.measurment_flags[i]
                             n_slow = np.sum(np.all(self.model_preview.colormap[flag.pos.x - int(flag.size/2): flag.pos.x + int(flag.size/2),
                                          flag.pos.y - int(flag.size/2): flag.pos.y + int(flag.size/2)] == self.model_preview.slowcolor, axis=2))
@@ -417,7 +407,7 @@ class GUI:
                     if k == 27:
                         cv2.destroyAllWindows()
                         break
-
+                self.model_preview.print_heatmap()
                 for i in range(n_vecs):
                     file_handles[i].close()
        

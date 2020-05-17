@@ -1,14 +1,487 @@
-import cv2
-from Simulation import Simulation
 from Vec2D import Vec2D
-import numpy as np
 
-if __name__ == "__main__":
-    ###############################################################
-    # Cross section X (2 lanes)
-    ###############################################################
-    mp = Simulation(100, 100, p=50)
 
+def create_roundabout(mp):
+    # Down
+    for cell in mp.cellmap[18:31, 0]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[15:18, 1]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[31:34, 1]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[13:15, 2]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[34:36, 2]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[11:13, 3]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[36:38, 3]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[10:11, 4]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[38:39, 4]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[9:10, 5]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[39:40, 5]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[8:9, 6]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[40:41, 6]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[7:8, 7]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[41:42, 7]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[6:7, 8]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[42:43, 8]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[5:6, 9]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[43:44, 9]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[4:5, 10]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[44:45, 10]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[3:4, 11]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[45:46, 11]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[2:3, 13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[46:47, 13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[1:2, 15]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[47:48, 15]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[0:1, 18]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[48:49, 18]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    # Up
+    for cell in mp.cellmap[19:32, 49]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[16:19, 48]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[32:35, 48]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[14:16, 47]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[35:37, 47]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[12:14, 46]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[37:39, 46]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[11:12, 45]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[39:40, 45]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[10:11, 44]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[40:41, 44]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[9:10, 43]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[41:42, 43]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[8:9, 42]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[42:43, 42]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[7:8, 41]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[43:44, 41]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[6:7, 40]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[44:45, 40]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[5:6, 39]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[45:46, 39]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[4:5, 38]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[46:47, 38]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[3:4, 36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[47:48, 36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[2:3, 34]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[48:49, 34]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[1:2, 31]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[49:50, 31]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    # left
+    for cell in mp.cellmap[0, 19:32]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[1, 16:19]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[1, 32:35]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[2, 14:16]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[2, 35:37]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[3, 12:14]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[3, 37:39]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[4, 11:12]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[4, 39:40]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[5, 10:11]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[5, 40:41]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[6, 9:10]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[6, 41:42]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[7, 8:9]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[7, 42:43]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[8, 7:8]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[8, 43:44]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[9, 6:7]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[9, 44:45]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[10, 5:6]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[10, 45:46]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[11, 4:5]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[11, 46:47]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[13, 3:4]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[13, 47:48]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[15, 2:3]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[15, 48:49]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[18, 1:2]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[18, 49:50]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    # right
+    for cell in mp.cellmap[49, 18:31]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[48, 15:18]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[48, 31:34]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[47, 13:15]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[47, 34:36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[46, 11:13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[46, 36:38]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[45, 10:11]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[45, 38:39]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[44, 9:10]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[44, 39:40]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[43, 8:9]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[43, 40:41]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[42, 7:8]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[42, 41:42]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[41, 6:7]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[41, 42:43]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[40, 5:6]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[40, 43:44]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[39, 4:5]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[39, 44:45]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[38, 3:4]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[38, 45:46]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[36, 2:3]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[36, 46:47]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[34, 1:2]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[34, 47:48]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[31, 0:1]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[31, 48:49]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+
+def create_cross_section(mp):
+    for cell in mp.cellmap[25, :]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[:, 25]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+
+def create_cross_section_x(mp):
     for cell in mp.cellmap[49, :]:
         cell.kind = "road"
         cell.direction.append(Vec2D(0, -1))
@@ -25,126 +498,74 @@ if __name__ == "__main__":
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
 
-    np.save("cross-section-X.npy", mp.cellmap)
 
-
-    # mp.add_car(pos=Vec2D(49, 5))
-    # mp.add_car(pos=Vec2D(49, 1), vel=2)
-    # mp.add_car(pos=Vec2D(5, 51))
-
-    # mp = Simulation(50, 50, p=50)
-
-    # for cell in mp.cellmap[25, :]:
-    #     cell.kind = "road"
-    #     cell.direction.append(Vec2D(0, 1))
-    #
-    # for cell in mp.cellmap[:, 25]:
-    #     cell.kind = "road"
-    #     cell.direction.append(Vec2D(1, 0))
-    #
-    # mp.cellmap = np.load("cross-section.npy", allow_pickle=True)
-    # mp.add_car(pos=Vec2D(25, 5))
-    # mp.add_car(pos=Vec2D(25, 1), vel=2)
-    # mp.add_car(pos=Vec2D(5, 25))
-    #
-    # mp.cellmap_outline_roads()
-    # mp.initialize_map()
-    # while True:
-    #     mp.step()
-    #     mp.print_map()
-    #     k = cv2.waitKey(50)
-    #     if k == 27:
-    #         break
-
-
-    ###############################################################
-    # Cross section T up (2 lanes)
-    ###############################################################
-    T_up = Simulation(100, 100, p=50)
-
-    for cell in T_up.cellmap[0, :]:
+def create_cross_section_t_up(mp):
+    for cell in mp.cellmap[0, :]:
         cell.kind = "road"
         cell.direction.append(Vec2D(0, -1))
 
-    for cell in T_up.cellmap[1:, 49]:
+    for cell in mp.cellmap[1:, 49]:
         cell.kind = "road"
         cell.direction.append(Vec2D(1, 0))
 
-    for cell in T_up.cellmap[2, :]:
+    for cell in mp.cellmap[2, :]:
         cell.kind = "road"
         cell.direction.append(Vec2D(0, 1))
 
-    for cell in T_up.cellmap[1:, 51]:
+    for cell in mp.cellmap[1:, 51]:
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
 
-    np.save("cross-section-T-up.npy", T_up.cellmap)
 
-    ###############################################################
-    # Cross section T down (2 lanes)
-    ###############################################################
-    T_down = Simulation(100, 100, p=50)
-
-    for cell in T_down.cellmap[97, :]:
+def create_cross_section_t_down(mp):
+    for cell in mp.cellmap[97, :]:
         cell.kind = "road"
         cell.direction.append(Vec2D(0, -1))
 
-    for cell in T_down.cellmap[:99, 49]:
+    for cell in mp.cellmap[:99, 49]:
         cell.kind = "road"
         cell.direction.append(Vec2D(1, 0))
 
-    for cell in T_down.cellmap[99, :]:
+    for cell in mp.cellmap[99, :]:
         cell.kind = "road"
         cell.direction.append(Vec2D(0, 1))
 
-    for cell in T_down.cellmap[:99, 51]:
+    for cell in mp.cellmap[:99, 51]:
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
 
-    np.save("cross-section-T-down.npy", T_down.cellmap)
 
-    ###############################################################
-    # Cross section T left (2 lanes)
-    ###############################################################
-    T_left = Simulation(100, 100, p=50)
-
-    for cell in T_left.cellmap[49, 1:]:
+def create_cross_section_t_left(mp):
+    for cell in mp.cellmap[49, 1:]:
         cell.kind = "road"
         cell.direction.append(Vec2D(0, -1))
 
-    for cell in T_left.cellmap[:, 0]:
+    for cell in mp.cellmap[:, 0]:
         cell.kind = "road"
         cell.direction.append(Vec2D(1, 0))
 
-    for cell in T_left.cellmap[51, 1:]:
+    for cell in mp.cellmap[51, 1:]:
         cell.kind = "road"
         cell.direction.append(Vec2D(0, 1))
 
-    for cell in T_left.cellmap[:, 2]:
+    for cell in mp.cellmap[:, 2]:
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
 
-    np.save("cross-section-T-left.npy", T_left.cellmap)
 
-    ###############################################################
-    # Cross section T right (2 lanes)
-    ###############################################################
-    T_right = Simulation(100, 100, p=50)
-
-    for cell in T_right.cellmap[49, :99]:
+def create_cross_section_t_right(mp):
+    for cell in mp.cellmap[49, :99]:
         cell.kind = "road"
         cell.direction.append(Vec2D(0, -1))
 
-    for cell in T_right.cellmap[:, 97]:
+    for cell in mp.cellmap[:, 97]:
         cell.kind = "road"
         cell.direction.append(Vec2D(1, 0))
 
-    for cell in T_right.cellmap[51, :99]:
+    for cell in mp.cellmap[51, :99]:
         cell.kind = "road"
         cell.direction.append(Vec2D(0, 1))
 
-    for cell in T_right.cellmap[:, 99]:
+    for cell in mp.cellmap[:, 99]:
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
-
-    np.save("cross-section-T-right.npy", T_right.cellmap)

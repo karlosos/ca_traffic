@@ -76,8 +76,10 @@ class Simulation:
         toRemove = []
         self.slow_cars = 0
         for car in self.cars:
+            jumps = 0
             for i in range(car.velocity):
                 # początek reguł tutaj
+                self.cellmap[car.position.x, car.position.y].visited += 1
                 cell = self.cellmap[car.position.x, car.position.y]
                 if all(dire.equal(Vec2D(0, 0)) for dire in cell.direction) or cell.direction is None:
                     self.colormap[car.position.x, car.position.y] = self.sidecolor
@@ -127,36 +129,32 @@ class Simulation:
             self.cars.remove(cartoremove)
 
     def find_starting_point(self):  # działa
-        points_found = [False, False, False, False]
-        for y in range(int(self.cellmap.shape[1]/2)):
-            if points_found[0] and points_found[1]:
-                break
-            for x in range(self.cellmap.shape[0]):
-                for direc in self.cellmap[x, y].direction:
-                    if direc.equal(Vec2D(0, 1)) and self.cellmap[x, y].kind == "road" and points_found[0] is False:
-                        self.starting_point.append(Vec2D(x, y))
-                        points_found[0] = True
-                        break
-                for direc in self.cellmap[x, -y-1].direction:
-                    if direc.equal(Vec2D(0, -1)) and self.cellmap[x, -y-1].kind == "road" and points_found[1] is False:
-                        self.starting_point.append(Vec2D(x, self.cellmap.shape[1]-y-1))
-                        points_found[1] = True
-                        break
-
-        for x in range(int(self.cellmap.shape[0]/2)):
-            if points_found[2] and points_found[3]:
-                break
+        self.starting_point = []
+        for x in range(self.cellmap.shape[0]):
             for y in range(self.cellmap.shape[1]):
-                for direc in self.cellmap[x, y].direction:
-                    if direc.equal(Vec2D(1, 0)) and self.cellmap[x, y].kind == "road" and points_found[2] is False:
-                        self.starting_point.append(Vec2D(x, y))
-                        points_found[2] = True
-                        break
-                for direc in self.cellmap[-x-1, y].direction:
-                    if direc.equal(Vec2D(-1, 0)) and self.cellmap[-x-1, y].kind == "road" and points_found[3] is False:
-                        self.starting_point.append(Vec2D(self.cellmap.shape[0]-x-1, y))
-                        points_found[3] = True
-                        break
+                if self.cellmap[x, y].kind == "road":
+                    if len(self.cellmap[x, y].direction) == 1:
+                        newPos = Vec2D(x, y).add(self.cellmap[x, y].direction[0].mul_int(-1))
+                        if 0 > newPos.x > self.cellmap.shape[0] or 0 > newPos.y > self.cellmap.shape[1]:
+                            continue
+                        else:
+                            if self.cellmap[newPos.x, newPos.y].kind != "road":
+                                self.starting_point.append(Vec2D(x, y))
+        to_remove = []
+        for pos in self.starting_point:
+            for i in range(-1, 2):
+                for j in range(-1, 2):
+                    cell = self.cellmap[pos.x+i, pos.y+j]
+                    if any(Vec2D(pos.x+i+dire.x, pos.y+j+dire.y).equal(pos) for dire in cell.direction):
+                        to_remove.append(pos)
+        for pos in to_remove:
+            self.starting_point.remove(pos)
+
+    def print_heatmap(self):
+        heatmap = np.zeros_like(self.cellmap)
+        for x in range(heatmap.shape[0]):
+            for y in range(heatmap.shape[1]):
+                heatmap[x, y] = self.cellmap[x, y].visited
 
 
 
