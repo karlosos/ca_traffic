@@ -33,6 +33,7 @@ class Simulation:
         self.max_slow_cars = 0
         if starting_point is None:
             self.starting_point = []
+        self.dt_string = ""
 
     def print_map(self, window):  # działa
         text = "Global traffic jam: "+str(self.slow_cars)+", "+"greatest global traffic jam: " + \
@@ -63,14 +64,14 @@ class Simulation:
                             if self.cellmap[row + i, col + j].kind is None:
                                 self.cellmap[row + i, col + j].kind = "side"
 
-    def add_car(self, pos=None, vel=1):
+    def add_car(self, pos=None, vel=1, idx=-1):
         if pos is None:
             pos = choice(self.starting_point)
         else:
             assert 0 <= pos.x < self.cellmap.shape[0] and 0 <= pos.y < self.cellmap.shape[1], "Invalid position"
             assert self.cellmap[pos.x, pos.y].kind == "road", "Position is not a road"
         assert 0 < vel < 5, "Invalid velocity"
-        car = Car(position=pos, velocity=choice([1, 2, 3, 4]))
+        car = Car(position=pos, velocity=choice([1, 2, 3, 4]), idx=idx)
         self.cellmap[pos.x, pos.y].car = car
         self.cars.append(car)
 
@@ -119,6 +120,7 @@ class Simulation:
                 else:
                     car.velocity = car.defaultvelocity
 
+                jumps += 1
                 self.colormap[car.position.x, car.position.y] = self.roadcolor
                 cell.car = None
                 car.position = newpos
@@ -126,6 +128,11 @@ class Simulation:
                 self.colormap[car.position.x, car.position.y] = self.carcolor
                 self.cellmap[car.position.x, car.position.y].car = car
                 car.oldDirection = direction
+
+            if car.idx != -1:
+                file_handle = open(self.dt_string + "\\car" + str(car.idx) + ".csv", "a")  # append only write mode
+                file_handle.write(str(jumps) + ", ")
+                file_handle.close()
 
         for cartoremove in toRemove:
             self.cars.remove(cartoremove)

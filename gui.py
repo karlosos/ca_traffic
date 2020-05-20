@@ -359,6 +359,7 @@ class GUI:
 
     def start_simulation(self):  # działa
         check_string = self.cars_entry.get()
+        car_num = 0
         if re.match("^[0-9]+$", check_string):
             cars_number = int(check_string)
             if isinstance(cars_number, int) and cars_number > 0:
@@ -372,23 +373,25 @@ class GUI:
                 axes = []
                 # fig = plt.figure()
                 n_vecs = len(self.measurment_flags)
+                now = datetime.now()
+                dt_string = now.strftime("%d-%m-%Y %H;%M;%S")
+                self.model_preview.dt_string = "Measurements\\" + dt_string
+                try:
+                    # Create target Directory
+                    os.mkdir(self.model_preview.dt_string)
+                except FileExistsError:
+                    pass
                 if n_vecs > 0:
                     # plt.show()
-                    now = datetime.now()
-                    dt_string = now.strftime("%d-%m-%Y %H;%M;%S")
-                    try:
-                        # Create target Directory
-                        os.mkdir("Measurements\\"+dt_string)
-                    except FileExistsError:
-                        pass
                     for i in range(n_vecs):
                         # axes.append(fig.add_subplot(n_vecs, 1, i+1))
                         vec = list([0 for _ in range(100)])
                         datavecs.append(vec)
-                        file_handles.append(open("Measurements\\" + dt_string + "\\" + str(i) + ".csv", "a"))  # append only write mode
+                        file_handles.append(open(self.model_preview.dt_string + "\\flag" + str(i) + ".csv", "a"))  # append only write mode
                 while True:
                     if len(self.model_preview.cars) < cars_number:
-                        self.model_preview.add_car()
+                        self.model_preview.add_car(idx=car_num)
+                        car_num = (car_num+1) % cars_number
                     self.model_preview.step()
                     self.model_preview.print_map("Map")
                     if n_vecs > 0:
