@@ -21,7 +21,7 @@ class GUI:
     def __init__(self, master):
         # main window
         self.master = master
-        self.master.minsize(900, 500)
+        self.master.minsize(1100, 500)
         self.master.title("Traffic modelling")
 
         # Scale
@@ -118,6 +118,16 @@ class GUI:
         self.eraser_resize_button = tk.Button(master=self.master, text="Resize tool", command=self.resize_eraser)  # reused for measurment flag
         self.measurment_flags = []
         self.flagcolor = [0, 255, 255]
+        # probability editor
+        self.probability_value = 0
+        self.is_editing_probability = False
+
+        self.edit_probability_button = tk.Button(master=self.master, text="Turn probability editing on", command=self.edit_turn_probability)
+        self.edit_probability_button.place(x=850, y=20)
+
+        self.edit_probability_entry = tk.Entry(self.master)
+        self.edit_probability_entry.insert(0, str(self.probability_value))
+        self.edit_probability_entry.place(x=1010, y=25, width=20)
 
     def generate_straight_road(self):
         try:
@@ -246,67 +256,77 @@ class GUI:
             self.eraser_resize_button.place(x=160, y=350, width=75, height=25)
 
     def place_part(self, event):
-        canvas = event.widget
-        row = int(canvas.canvasy(event.y)/self.scale)
-        col = int(canvas.canvasx(event.x)/self.scale)
-        if self.currentlychosen == 8:
-            for y in range(0 if 0 > col-int(self.part_preview.cellmap.shape[0]/2) else col-int(self.part_preview.cellmap.shape[0]/2),
-                           self.model_preview.cellmap.shape[0] if self.model_preview.cellmap.shape[0] <
-                                                                  col+int(self.part_preview.cellmap.shape[0]/2)
-                                                               else col+int(self.part_preview.cellmap.shape[0]/2)):
-                for x in range(0 if 0 > row-int(self.part_preview.cellmap.shape[1]/2) else row-int(self.part_preview.cellmap.shape[1]/2),
-                               self.model_preview.cellmap.shape[1] if self.model_preview.cellmap.shape[1] <
-                               row+int(self.part_preview.cellmap.shape[1]/2) else row+int(self.part_preview.cellmap.shape[1]/2)):
-                    self.model_preview.cellmap[x, y] = Cell()
-                    self.model_preview.colormap[x, y] = self.model_preview.nonecolor
-        elif self.currentlychosen == 9:
-            if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
-                        row - int(self.part_preview.cellmap.shape[1]/2) < 0:
-                msg.showerror("Flag won't fit vertically")
-                return
-            if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
-                col - int(self.part_preview.cellmap.shape[0]/2) < 0:
-                msg.showerror("Flag won't fit horizontally")
-                return
-
-            self.measurment_flags.append(MeasurmentFlag(Vec2D(row, col), int(self.straight_road_entry_width.get())))
-
-            for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(self.part_preview.cellmap.shape[1]/2)):
-                for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(self.part_preview.cellmap.shape[0]/2)):
-                    if np.array_equal(self.model_preview.colormap[x, y], self.model_preview.nonecolor):
-                        self.model_preview.colormap[x, y] = self.flagcolor
-            return
+        if self.is_editing_probability:
+            canvas = event.widget
+            row = int(canvas.canvasy(event.y)/self.scale)
+            col = int(canvas.canvasx(event.x)/self.scale)
+            if len(self.model_preview.cellmap[row, col].direction) == 2:
+                turn_probability = max(int(self.edit_probability_entry.get()), 0)
+                turn_probability = min(turn_probability, 100)
+                print(turn_probability)
+                self.model_preview.cellmap[row, col].probability = turn_probability
         else:
-            if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
-                        row - int(self.part_preview.cellmap.shape[1]/2) < 0:
-                msg.showerror("Part won't fit vertically")
-                return
-            if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
-                col - int(self.part_preview.cellmap.shape[0]/2) < 0:
-                msg.showerror("Part won't fit horizontally")
-                return
-            part_preview = deepcopy(self.part_preview)
+            canvas = event.widget
+            row = int(canvas.canvasy(event.y)/self.scale)
+            col = int(canvas.canvasx(event.x)/self.scale)
+            if self.currentlychosen == 8:
+                for y in range(0 if 0 > col-int(self.part_preview.cellmap.shape[0]/2) else col-int(self.part_preview.cellmap.shape[0]/2),
+                            self.model_preview.cellmap.shape[0] if self.model_preview.cellmap.shape[0] <
+                                                                    col+int(self.part_preview.cellmap.shape[0]/2)
+                                                                else col+int(self.part_preview.cellmap.shape[0]/2)):
+                    for x in range(0 if 0 > row-int(self.part_preview.cellmap.shape[1]/2) else row-int(self.part_preview.cellmap.shape[1]/2),
+                                self.model_preview.cellmap.shape[1] if self.model_preview.cellmap.shape[1] <
+                                row+int(self.part_preview.cellmap.shape[1]/2) else row+int(self.part_preview.cellmap.shape[1]/2)):
+                        self.model_preview.cellmap[x, y] = Cell()
+                        self.model_preview.colormap[x, y] = self.model_preview.nonecolor
+            elif self.currentlychosen == 9:
+                if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
+                            row - int(self.part_preview.cellmap.shape[1]/2) < 0:
+                    msg.showerror("Flag won't fit vertically")
+                    return
+                if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
+                    col - int(self.part_preview.cellmap.shape[0]/2) < 0:
+                    msg.showerror("Flag won't fit horizontally")
+                    return
 
-            for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(part_preview.cellmap.shape[1]/2)):
-                for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
-                    modelcell = self.model_preview.cellmap[x, y]
-                    partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
-                    if modelcell.kind is None and partcell.kind is not None:
-                        self.model_preview.cellmap[x, y] = partcell
-                        self.model_preview.colormap[x, y] = self.model_preview.roadcolor
-                    elif modelcell.kind == "road" and partcell.kind == "road":
-                        for dire in partcell.direction:
-                            if not any(dire.equal(direc) for direc in modelcell.direction):
-                                self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
+                self.measurment_flags.append(MeasurmentFlag(Vec2D(row, col), int(self.straight_road_entry_width.get())))
 
-        self.model_preview.initialize_map()
-        # image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
-        im = Image.fromarray(self.model_preview.colormap)
-        w = int(im.width * self.scale)
-        h = int(im.height * self.scale)
-        img = im.resize((w, h), Image.ANTIALIAS)
-        self.canvas_image = ImageTk.PhotoImage(img)
-        self.canvas.itemconfigure(self.imageId, image=self.canvas_image)
+                for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(self.part_preview.cellmap.shape[1]/2)):
+                    for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(self.part_preview.cellmap.shape[0]/2)):
+                        if np.array_equal(self.model_preview.colormap[x, y], self.model_preview.nonecolor):
+                            self.model_preview.colormap[x, y] = self.flagcolor
+                return
+            else:
+                if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
+                            row - int(self.part_preview.cellmap.shape[1]/2) < 0:
+                    msg.showerror("Part won't fit vertically")
+                    return
+                if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
+                    col - int(self.part_preview.cellmap.shape[0]/2) < 0:
+                    msg.showerror("Part won't fit horizontally")
+                    return
+                part_preview = deepcopy(self.part_preview)
+
+                for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(part_preview.cellmap.shape[1]/2)):
+                    for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
+                        modelcell = self.model_preview.cellmap[x, y]
+                        partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
+                        if modelcell.kind is None and partcell.kind is not None:
+                            self.model_preview.cellmap[x, y] = partcell
+                            self.model_preview.colormap[x, y] = self.model_preview.roadcolor
+                        elif modelcell.kind == "road" and partcell.kind == "road":
+                            for dire in partcell.direction:
+                                if not any(dire.equal(direc) for direc in modelcell.direction):
+                                    self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
+
+            self.model_preview.initialize_map()
+            # image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
+            im = Image.fromarray(self.model_preview.colormap)
+            w = int(im.width * self.scale)
+            h = int(im.height * self.scale)
+            img = im.resize((w, h), Image.ANTIALIAS)
+            self.canvas_image = ImageTk.PhotoImage(img)
+            self.canvas.itemconfigure(self.imageId, image=self.canvas_image)
 
     def do_zoom(self, event):
         true_x = self.canvas.canvasx(event.x)
@@ -330,27 +350,38 @@ class GUI:
 
     def mouse_over_canvas(self, event):
         canvas = event.widget
-        [part_size_x, part_size_y, _] = self.part_preview.colormap.shape
-        # row = int(canvas.canvasy(event.y) - part_size_x/2)
-        # col = int(canvas.canvasx(event.x) - part_size_y/2)
-        row = int(canvas.canvasy(event.y)/self.scale - part_size_x/2)
-        col = int(canvas.canvasx(event.x)/self.scale - part_size_y/2)
         model_image = self.model_preview.colormap.copy()
-        part_preview_image = self.part_preview.colormap.copy()
+        if self.is_editing_probability:
+            row = int(canvas.canvasy(event.y)/self.scale)
+            col = int(canvas.canvasx(event.x)/self.scale)
+            if len(self.model_preview.cellmap[row, col].direction) == 2:
+                # podswietlenie komorki
+                model_image[row, col] = self.model_preview.slowcolor
+                img = Image.fromarray(model_image)
+                self.canvas_image = ImageTk.PhotoImage(img)
+                self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
 
-        try:
-            model_image_crop = model_image[row:row+part_size_x, col:col+part_size_y]
-            roads_index = np.logical_not(part_preview_image == self.model_preview.nonecolor)
-            model_image_crop[roads_index] = part_preview_image[roads_index]
-        except:
-            pass
+        else:
+            [part_size_x, part_size_y, _] = self.part_preview.colormap.shape
+            # row = int(canvas.canvasy(event.y) - part_size_x/2)
+            # col = int(canvas.canvasx(event.x) - part_size_y/2)
+            row = int(canvas.canvasy(event.y)/self.scale - part_size_x/2)
+            col = int(canvas.canvasx(event.x)/self.scale - part_size_y/2)
+            part_preview_image = self.part_preview.colormap.copy()
 
-        self.canvas_image = array_to_tk(model_image)
+            try:
+                model_image_crop = model_image[row:row+part_size_x, col:col+part_size_y]
+                roads_index = np.logical_not(part_preview_image == self.model_preview.nonecolor)
+                model_image_crop[roads_index] = part_preview_image[roads_index]
+            except:
+                pass
+
+            self.canvas_image = array_to_tk(model_image)
 
         im = Image.fromarray(model_image)
         w = int(im.width * self.scale)
         h = int(im.height * self.scale)
-        img = im.resize((w, h), Image.ANTIALIAS)
+        img = im.resize((w, h), Image.NEAREST)
         self.canvas_image = ImageTk.PhotoImage(img)
         self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
 
@@ -464,4 +495,10 @@ class GUI:
         except AssertionError:
             return
 
-
+    def edit_turn_probability(self):
+        self.is_editing_probability = not self.is_editing_probability 
+        if self.is_editing_probability:
+            self.edit_probability_button = tk.Button(master=self.master, text="Turn probability editing off", command=self.edit_turn_probability)
+        else:
+            self.edit_probability_button = tk.Button(master=self.master, text="Turn probability editing on", command=self.edit_turn_probability)
+        self.edit_probability_button.place(x=850, y=20)

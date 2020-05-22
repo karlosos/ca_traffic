@@ -7,3 +7,4 @@ class Cell:
         self.kind = kind
         self.direction = direction
         self.visited = 0
+        self.probability = None
