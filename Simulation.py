@@ -97,10 +97,11 @@ class Simulation:
 
                 elif len(cell.direction) == 2:
                     random = randrange(0, 100)
-                    if random > self.probabilityOfTurn:
-                        direction = cell.direction[0] if cell.direction[0].equal(car.oldDirection) else cell.direction[1]
+                    p = self.probabilityOfTurn if cell.probability is None else cell.probability
+                    if random > p:
+                        direction = cell.direction[0]
                     else:
-                        direction = cell.direction[0] if not cell.direction[0].equal(car.oldDirection) else cell.direction[1]
+                        direction = cell.direction[1]
 
                 newpos = car.position.add(direction)
 
