@@ -349,41 +349,45 @@ class GUI:
         self.canvas.configure(scrollregion=(0, 0, w, h))
 
     def mouse_over_canvas(self, event):
-        canvas = event.widget
-        model_image = self.model_preview.colormap.copy()
-        if self.is_editing_probability:
-            row = int(canvas.canvasy(event.y)/self.scale)
-            col = int(canvas.canvasx(event.x)/self.scale)
-            if len(self.model_preview.cellmap[row, col].direction) == 2:
-                # podswietlenie komorki
-                model_image[row, col] = self.model_preview.slowcolor
-                img = Image.fromarray(model_image)
-                self.canvas_image = ImageTk.PhotoImage(img)
-                self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
+        try:
+            canvas = event.widget
+            model_image = self.model_preview.colormap.copy()
+            if self.is_editing_probability:
+                row = int(canvas.canvasy(event.y)/self.scale)
+                col = int(canvas.canvasx(event.x)/self.scale)
+                if len(self.model_preview.cellmap[row, col].direction) == 2:
+                    # podswietlenie komorki
+                    model_image[row, col] = self.model_preview.slowcolor
+                    img = Image.fromarray(model_image)
+                    self.canvas_image = ImageTk.PhotoImage(img)
+                    self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
 
-        else:
-            [part_size_x, part_size_y, _] = self.part_preview.colormap.shape
-            # row = int(canvas.canvasy(event.y) - part_size_x/2)
-            # col = int(canvas.canvasx(event.x) - part_size_y/2)
-            row = int(canvas.canvasy(event.y)/self.scale - part_size_x/2)
-            col = int(canvas.canvasx(event.x)/self.scale - part_size_y/2)
-            part_preview_image = self.part_preview.colormap.copy()
+            else:
+                [part_size_x, part_size_y, _] = self.part_preview.colormap.shape
+                # row = int(canvas.canvasy(event.y) - part_size_x/2)
+                # col = int(canvas.canvasx(event.x) - part_size_y/2)
+                row = int(canvas.canvasy(event.y)/self.scale - part_size_x/2)
+                col = int(canvas.canvasx(event.x)/self.scale - part_size_y/2)
+                part_preview_image = self.part_preview.colormap.copy()
 
-            try:
-                model_image_crop = model_image[row:row+part_size_x, col:col+part_size_y]
-                roads_index = np.logical_not(part_preview_image == self.model_preview.nonecolor)
-                model_image_crop[roads_index] = part_preview_image[roads_index]
-            except:
-                pass
+                try:
+                    model_image_crop = model_image[row:row+part_size_x, col:col+part_size_y]
+                    roads_index = np.logical_not(part_preview_image == self.model_preview.nonecolor)
+                    model_image_crop[roads_index] = part_preview_image[roads_index]
+                except:
+                    pass
 
-            self.canvas_image = array_to_tk(model_image)
+                self.canvas_image = array_to_tk(model_image)
 
-        im = Image.fromarray(model_image)
-        w = int(im.width * self.scale)
-        h = int(im.height * self.scale)
-        img = im.resize((w, h), Image.NEAREST)
-        self.canvas_image = ImageTk.PhotoImage(img)
-        self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
+            im = Image.fromarray(model_image)
+            w = int(im.width * self.scale)
+            h = int(im.height * self.scale)
+            img = im.resize((w, h), Image.NEAREST)
+            self.canvas_image = ImageTk.PhotoImage(img)
+            self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
+
+        except IndexError:
+            pass
 
     def mouse_leaves_canvas(self, event):
         return
