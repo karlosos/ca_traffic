@@ -8,3 +8,4 @@ class Car:
         self.oldDirection = Vec2D()
         self.defaultvelocity = velocity
         self.idx = idx
+        self.flag = False

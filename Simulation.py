@@ -4,8 +4,10 @@ import numpy as np
 from random import randrange, choice
 from Cell import Cell
 from Vec2D import Vec2D
+import math
 import seaborn as sns
 import matplotlib.pyplot as plt
+from TrafficLights import TrafficLigth, RED, GREEN, ORANGE
 
 
 class Simulation:
@@ -23,6 +25,7 @@ class Simulation:
         self.cellmap = np.array([list(Cell() for _ in range(sizeX)) for _ in range(sizeY)])
         self.colormap = np.array(np.full([sizeY, sizeX, 3], 255), dtype=np.uint8)
         self.cars = []
+        self.trafficLights = []
         self.probabilityOfTurn = p
         self.roadcolor = roadcolor
         self.carcolor = carcolor
@@ -31,6 +34,7 @@ class Simulation:
         self.slowcolor = slowcolor
         self.slow_cars = 0
         self.max_slow_cars = 0
+        self.currentIteration = 0
         if starting_point is None:
             self.starting_point = []
         self.dt_string = ""
@@ -54,6 +58,9 @@ class Simulation:
                         self.colormap[row, col] = self.roadcolor
                 elif self.cellmap[row, col].kind == "side":
                     self.colormap[row, col] = self.sidecolor
+                elif self.cellmap[row, col].kind == "light":
+                    self.colormap[row, col] = np.array(self.cellmap[row, col].trafficLight.currentColor, dtype=np.uint8)
+
 
     def cellmap_outline_roads(self):  # działa
         for row in range(1, self.cellmap.shape[0] - 1):
@@ -76,11 +83,43 @@ class Simulation:
         self.cars.append(car)
 
     def step(self):  # działa
+        self.currentIteration += 1
         toRemove = []
         self.slow_cars = 0
+        [light.update(self.currentIteration) for light in self.trafficLights]
+        for light in self.trafficLights:
+            self.colormap[light.position.x, light.position.y] = np.array(light.currentColor, dtype=np.uint8)
         for car in self.cars:
             jumps = 0
+            nextCellPos = car.position.add(car.oldDirection)
+            if abs(car.oldDirection.y) == 1:
+                potentialTrafficLightPosition = [car.position.x + car.oldDirection.y, car.position.y + car.oldDirection.x]
+            else:
+                potentialTrafficLightPosition = [car.position.x - car.oldDirection.y, car.position.y - car.oldDirection.x]
+            if car.velocity == 0 and ((self.cellmap[nextCellPos.x, nextCellPos.y].car is None and car.flag == False) or (car.flag == True and self.cellmap[potentialTrafficLightPosition[0], potentialTrafficLightPosition[1]].trafficLight.currentColor != RED)):
+                car.velocity = car.defaultvelocity
+                car.flag = False
             for i in range(car.velocity):
+                nextCellPos = car.position.add(car.oldDirection)
+                if abs(car.oldDirection.y) == 1:
+                    potentialTrafficLightPosition = [nextCellPos.x + car.oldDirection.y, nextCellPos.y + car.oldDirection.x]
+                else:
+                    potentialTrafficLightPosition = [nextCellPos.x - car.oldDirection.y, nextCellPos.y - car.oldDirection.x]
+                potentialTrafficLightPosition2 = car.oldDirection.mul_int(4)
+                cell = self.cellmap[car.position.x, car.position.y]
+                if self.cellmap[potentialTrafficLightPosition[0], potentialTrafficLightPosition[1]].kind == "light" and self.cellmap[potentialTrafficLightPosition[0]+potentialTrafficLightPosition2.x, potentialTrafficLightPosition[1]+potentialTrafficLightPosition2.y].kind == "light" and \
+                self.cellmap[potentialTrafficLightPosition[0], potentialTrafficLightPosition[1]].trafficLight.currentColor == RED and self.cellmap[nextCellPos.x, nextCellPos.y].car is None:
+                    cell.car = None
+                    car.flag = True
+                    car.velocity = 0
+                    self.colormap[car.position.x, car.position.y] = self.roadcolor
+                    car.position = nextCellPos
+                    self.colormap[car.position.x, car.position.y] = self.slowcolor
+                    self.cellmap[car.position.x, car.position.y].car = car
+                    self.slow_cars += 1
+                    if self.slow_cars > self.max_slow_cars:
+                        self.max_slow_cars = self.slow_cars
+                    break
                 # początek reguł tutaj
                 self.cellmap[car.position.x, car.position.y].visited += 1
                 cell = self.cellmap[car.position.x, car.position.y]
