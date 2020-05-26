@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 class Simulation:
-    def __init__(self, sizeX, sizeY, p=15, starting_point=None, roadcolor=None, carcolor=None, sidecolor=None, nonecolor=None, slowcolor=None):
+    def __init__(self, sizeX, sizeY, p=50, starting_point=None, roadcolor=None, carcolor=None, sidecolor=None, nonecolor=None, slowcolor=None):
         if roadcolor is None:
             roadcolor = np.array([125, 125, 125], dtype=np.uint8)
         if carcolor is None:
@@ -110,6 +110,48 @@ class Simulation:
                     cell.car = None
                     toRemove.append(car)
                     break
+
+                try:
+                    wrong = []
+                    c = []
+                    if len(self.cellmap[newpos.x, newpos.y].direction) == 1:
+                        d = self.cellmap[newpos.x, newpos.y].direction[0]
+                        if d.equal(Vec2D(-1, -1)) or d.equal(Vec2D(1, 1)):
+                            c = [Vec2D(newpos.x + 1, newpos.y - 1), Vec2D(newpos.x - 1, newpos.y + 1)]
+                            for v in c:
+                                if self.cellmap[v.x, v.y].kind != "road" or \
+                                    len(self.cellmap[v.x, v.y].direction) != 1 or \
+                                        not self.cellmap[v.x, v.y].direction[0].equal(d):
+                                    wrong.append(v)
+                        elif d.equal(Vec2D(0, -1)) or d.equal(Vec2D(0, 1)):
+                            c = [Vec2D(newpos.x + 1, newpos.y), Vec2D(newpos.x - 1, newpos.y)]
+                            for v in c:
+                                if self.cellmap[v.x, v.y].kind != "road" or \
+                                    len(self.cellmap[v.x, v.y].direction) != 1 or \
+                                        not self.cellmap[v.x, v.y].direction[0].equal(d):
+                                    wrong.append(v)
+                        elif d.equal(Vec2D(1, -1)) or d.equal(Vec2D(-1, 1)):
+                            c = [Vec2D(newpos.x - 1, newpos.y - 1), Vec2D(newpos.x + 1, newpos.y + 1)]
+                            for v in c:
+                                if self.cellmap[v.x, v.y].kind != "road" or \
+                                    len(self.cellmap[v.x, v.y].direction) != 1 or \
+                                        not self.cellmap[v.x, v.y].direction[0].equal(d):
+                                    wrong.append(v)
+                        elif d.equal(Vec2D(1, 0)) or d.equal(Vec2D(-1, 0)):
+                            c = [Vec2D(newpos.x, newpos.y - 1), Vec2D(newpos.x, newpos.y + 1)]
+                            for v in c:
+                                if self.cellmap[v.x, v.y].kind != "road" or \
+                                    len(self.cellmap[v.x, v.y].direction) != 1 or \
+                                        not self.cellmap[v.x, v.y].direction[0].equal(d):
+                                    wrong.append(v)
+                    for w in wrong:
+                        c.remove(w)
+                    if len(c) > 0:
+                        r2 = randrange(0, 100)
+                        if r2 < 10:
+                            newpos = choice(c)
+                except IndexError:
+                    pass
 
                 if self.cellmap[newpos.x, newpos.y].car is not None:
                     car.velocity = self.cellmap[newpos.x, newpos.y].car.velocity
