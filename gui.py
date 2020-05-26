@@ -54,6 +54,7 @@ class GUI:
         self.part_options_listbox.insert(7, "cross-section-T-right")
         self.part_options_listbox.insert(8, "eraser")
         self.part_options_listbox.insert(9, "Measuring-flag")
+        self.part_options_listbox.insert(10, "cross-section-X-lights")
         self.load_button = tk.Button(master=self.master, text="Load model", command=self.load_part)
         self.load_button.place(x=25, y=310)
         # straight road generation
@@ -254,6 +255,10 @@ class GUI:
             self.part_preview.colormap[:, :] = self.flagcolor
             self.make_preview()
             self.eraser_resize_button.place(x=160, y=350, width=75, height=25)
+        elif self.currentlychosen == 10:
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_x_light(self.part_preview)
+            self.make_preview()
 
     def place_part(self, event):
         if self.is_editing_probability:
@@ -311,6 +316,26 @@ class GUI:
                     for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
                         modelcell = self.model_preview.cellmap[x, y]
                         partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
+                        if partcell.kind == "light":
+                            modelcell.trafficLight = partcell.trafficLight
+                            modelcell.trafficLight.position = Vec2D(x, y)
+                            self.model_preview.trafficLights.append(modelcell.trafficLight)
+                        if modelcell.kind is None and partcell.kind is not None:
+                            self.model_preview.cellmap[x, y] = partcell
+                            self.model_preview.colormap[x, y] = self.model_preview.roadcolor
+                        elif modelcell.kind == "road" and partcell.kind == "road":
+                            for dire in partcell.direction:
+                                if not any(dire.equal(direc) for direc in modelcell.direction):
+                                    self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
+
+                for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(part_preview.cellmap.shape[1]/2)):
+                    for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
+                        modelcell = self.model_preview.cellmap[x, y]
+                        partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
+                        if partcell.kind == "light":
+                            modelcell.trafficLight = partcell.trafficLight
+                            modelcell.trafficLight.position = Vec2D(x, y)
+                            self.model_preview.trafficLights.append(modelcell.trafficLight)
                         if modelcell.kind is None and partcell.kind is not None:
                             self.model_preview.cellmap[x, y] = partcell
                             self.model_preview.colormap[x, y] = self.model_preview.roadcolor

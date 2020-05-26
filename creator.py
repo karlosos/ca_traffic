@@ -1,5 +1,5 @@
 from Vec2D import Vec2D
-
+from TrafficLights import TrafficLigth
 
 def create_roundabout(mp):
     # Down
@@ -498,6 +498,30 @@ def create_cross_section_x(mp):
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
 
+def create_cross_section_x_light(mp):
+    for cell in mp.cellmap[49, :]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[:, 49]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[51, :]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[:, 51]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+    mp.cellmap[48, 52].kind="light"
+    mp.cellmap[48, 52].trafficLight = TrafficLigth(98, 58)
+    mp.cellmap[52, 48].kind="light"
+    mp.cellmap[52, 48].trafficLight = TrafficLigth(98, 58)
+    mp.cellmap[48, 48].kind="light"
+    mp.cellmap[48, 48].trafficLight = TrafficLigth(98, 0)
+    mp.cellmap[52, 52].kind="light"
+    mp.cellmap[52, 52].trafficLight = TrafficLigth(98, 0)
 
 def create_cross_section_t_up(mp):
     for cell in mp.cellmap[0, :]:
