@@ -56,9 +56,9 @@ class Simulation:
                         self.colormap[row, col] = self.carcolor
                     else:
                         self.colormap[row, col] = self.roadcolor
-                elif self.cellmap[row, col].kind == "side":
+                elif self.cellmap[row, col].kind == "side" and self.cellmap[row, col].trafficLight is None:
                     self.colormap[row, col] = self.sidecolor
-                elif self.cellmap[row, col].kind == "light":
+                elif self.cellmap[row, col].trafficLight is not None:
                     self.colormap[row, col] = np.array(self.cellmap[row, col].trafficLight.currentColor, dtype=np.uint8)
 
 
@@ -107,7 +107,7 @@ class Simulation:
                     potentialTrafficLightPosition = [nextCellPos.x - car.oldDirection.y, nextCellPos.y - car.oldDirection.x]
                 potentialTrafficLightPosition2 = car.oldDirection.mul_int(4)
                 cell = self.cellmap[car.position.x, car.position.y]
-                if self.cellmap[potentialTrafficLightPosition[0], potentialTrafficLightPosition[1]].kind == "light" and self.cellmap[potentialTrafficLightPosition[0]+potentialTrafficLightPosition2.x, potentialTrafficLightPosition[1]+potentialTrafficLightPosition2.y].kind == "light" and \
+                if self.cellmap[potentialTrafficLightPosition[0], potentialTrafficLightPosition[1]].trafficLight is not None and self.cellmap[potentialTrafficLightPosition[0]+potentialTrafficLightPosition2.x, potentialTrafficLightPosition[1]+potentialTrafficLightPosition2.y].trafficLight is not None and \
                 self.cellmap[potentialTrafficLightPosition[0], potentialTrafficLightPosition[1]].trafficLight.currentColor == RED and self.cellmap[nextCellPos.x, nextCellPos.y].car is None:
                     cell.car = None
                     car.flag = True

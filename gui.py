@@ -316,23 +316,7 @@ class GUI:
                     for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
                         modelcell = self.model_preview.cellmap[x, y]
                         partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
-                        if partcell.kind == "light":
-                            modelcell.trafficLight = partcell.trafficLight
-                            modelcell.trafficLight.position = Vec2D(x, y)
-                            self.model_preview.trafficLights.append(modelcell.trafficLight)
-                        if modelcell.kind is None and partcell.kind is not None:
-                            self.model_preview.cellmap[x, y] = partcell
-                            self.model_preview.colormap[x, y] = self.model_preview.roadcolor
-                        elif modelcell.kind == "road" and partcell.kind == "road":
-                            for dire in partcell.direction:
-                                if not any(dire.equal(direc) for direc in modelcell.direction):
-                                    self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
-
-                for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(part_preview.cellmap.shape[1]/2)):
-                    for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
-                        modelcell = self.model_preview.cellmap[x, y]
-                        partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
-                        if partcell.kind == "light":
+                        if partcell.trafficLight is not None:
                             modelcell.trafficLight = partcell.trafficLight
                             modelcell.trafficLight.position = Vec2D(x, y)
                             self.model_preview.trafficLights.append(modelcell.trafficLight)
