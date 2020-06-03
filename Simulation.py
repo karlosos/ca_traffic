@@ -61,7 +61,6 @@ class Simulation:
                 elif self.cellmap[row, col].trafficLight is not None:
                     self.colormap[row, col] = np.array(self.cellmap[row, col].trafficLight.currentColor, dtype=np.uint8)
 
-
     def cellmap_outline_roads(self):  # działa
         for row in range(1, self.cellmap.shape[0] - 1):
             for col in range(1, self.cellmap.shape[1] - 1):
@@ -82,7 +81,7 @@ class Simulation:
         self.cellmap[pos.x, pos.y].car = car
         self.cars.append(car)
 
-    def step(self):  # działa
+    def step(self, cars_number):  # działa
         self.currentIteration += 1
         toRemove = []
         self.slow_cars = 0
@@ -211,6 +210,11 @@ class Simulation:
                 self.cellmap[car.position.x, car.position.y].car = car
                 car.oldDirection = direction
 
+            car.distance_traveled += jumps
+            if self.currentIteration >= cars_number:
+                file_handle_quiver = open(self.dt_string+"\\quiverdata.csv", "a")
+                file_handle_quiver.write(str(car.idx*4+car.distance_traveled)+","+str(self.currentIteration)+","+str(car.oldDirection.x)+","+str(car.oldDirection.y)+"\n")
+                file_handle_quiver.close()
             if car.idx != -1:
                 file_handle = open(self.dt_string + "\\car" + str(car.idx) + ".csv", "a")  # append only write mode
                 file_handle.write(str(jumps) + ", ")
@@ -241,16 +245,17 @@ class Simulation:
         for pos in to_remove:
             self.starting_point.remove(pos)
 
-    def print_heatmap(self):
+    def print_heatmap(self, axes):
         heatmap = np.zeros_like(self.cellmap, dtype=np.uint16)
         for x in range(heatmap.shape[0]):
             for y in range(heatmap.shape[1]):
                 heatmap[x, y] = self.cellmap[x, y].visited
-        plt.subplot(121)
-        sns.heatmap(heatmap)
-        plt.subplot(122)
-        plt.imshow(self.colormap, aspect="auto")
-        plt.show()
+        # plt.figure()
+        # plt.subplot(121)
+        axes[0] = axes[0].imshow(X=np.array(self.colormap, dtype=np.uint8), aspect="auto")
+        # plt.subplot(122)
+        axes[1] = sns.heatmap(heatmap)
+        # plt.show()
 
 
 

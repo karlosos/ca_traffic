@@ -5,6 +5,7 @@ import os
 
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 from Simulation import Simulation
 from resizer import fit_tk, array_to_tk
@@ -420,6 +421,8 @@ class GUI:
                 now = datetime.now()
                 dt_string = now.strftime("%d-%m-%Y %H;%M;%S")
                 self.model_preview.dt_string = "Measurements\\" + dt_string
+                fig2 = plt.figure()
+                ax2 = fig2.subplots()
                 try:
                     # Create target Directory
                     os.mkdir(self.model_preview.dt_string)
@@ -436,13 +439,13 @@ class GUI:
                     if len(self.model_preview.cars) < cars_number:
                         self.model_preview.add_car(idx=car_num)
                         car_num = (car_num+1) % cars_number
-                    self.model_preview.step()
+                    self.model_preview.step(cars_number)
                     self.model_preview.print_map("Map")
                     if n_vecs > 0:
                         for i in range(n_vecs):
                             flag = self.measurment_flags[i]
                             n_slow = np.sum(np.all(self.model_preview.colormap[flag.pos.x - int(flag.size/2): flag.pos.x + int(flag.size/2),
-                                         flag.pos.y - int(flag.size/2): flag.pos.y + int(flag.size/2)] == self.model_preview.slowcolor, axis=2))
+                                            flag.pos.y - int(flag.size/2): flag.pos.y + int(flag.size/2)] == self.model_preview.slowcolor, axis=2))
                             file_handles[i].write(str(n_slow)+", ")
                             # datavecs[i].pop(0)
                             # datavecs[i].append(n_slow)
@@ -454,9 +457,24 @@ class GUI:
                     if k == 27:
                         cv2.destroyAllWindows()
                         break
-                self.model_preview.print_heatmap()
+                file_handle_quiver = open(self.model_preview.dt_string+"\\quiverdata.csv", "r")
+                lines = file_handle_quiver.readlines()
+                for line in lines:
+                    data = line.split(",")
+                    ax2.quiver(float(data[0]),
+                               float(data[1]),
+                               float(data[2]),
+                               float(data[3]),
+                               scale=5.0,
+                               scale_units="inches",
+                               headwidth=1,
+                               headlength=1)
+                fig1 = plt.figure()
+                axes1 = fig1.subplots(1, 2)
+                self.model_preview.print_heatmap(axes1)
                 for i in range(n_vecs):
                     file_handles[i].close()
+                plt.show()
        
     def resize_map(self):
         x = int(self.resize_map_Entry_X.get())

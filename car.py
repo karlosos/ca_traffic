@@ -9,3 +9,4 @@ class Car:
         self.defaultvelocity = velocity
         self.idx = idx
         self.flag = False
+        self.distance_traveled = 0
