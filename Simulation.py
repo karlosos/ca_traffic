@@ -256,6 +256,3 @@ class Simulation:
         # plt.subplot(122)
         axes[1] = sns.heatmap(heatmap)
         # plt.show()
-
-
-

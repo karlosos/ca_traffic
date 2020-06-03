@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.messagebox as msg
+from tkinter import filedialog
 from math import floor, ceil
 import os
 
@@ -16,7 +17,7 @@ from Cell import Cell
 from MeasurmentFlag import MeasurmentFlag
 from datetime import datetime
 from creator import *
-
+import pickle
 
 class GUI:
     def __init__(self, master):
@@ -24,6 +25,14 @@ class GUI:
         self.master = master
         self.master.minsize(1100, 500)
         self.master.title("Traffic modelling")
+
+        # menu
+        menubar = tk.Menu(self.master)
+        filemenu = tk.Menu(menubar, tearoff=0)
+        filemenu.add_command(label="Open", command=self.open_simulation)
+        filemenu.add_command(label="Save", command=self.save_simulation)
+        menubar.add_cascade(label="File", menu=filemenu)
+        self.master.config(menu=menubar)
 
         # Scale
         self.imageId = 0
@@ -77,6 +86,7 @@ class GUI:
         self.canvas_relwidth = 0.6
         self.canvas_relheight = 0.7
         self.model_preview = Simulation(500, 500, 50)
+        #load_simulation("data.sim")
         self.model_preview.initialize_map()
         self.canvas_image = array_to_tk(self.model_preview.colormap)
         self.model_preview_desc = tk.Label(self.master, text="Preview of model")
@@ -130,6 +140,31 @@ class GUI:
         self.edit_probability_entry = tk.Entry(self.master)
         self.edit_probability_entry.insert(0, str(self.probability_value))
         self.edit_probability_entry.place(x=1010, y=25, width=20)
+
+    def open_simulation(self):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        filename =  filedialog.askopenfilename(initialdir = dir_path, title = "Select file",filetypes = (("simulation files","*.sim"),("all files","*.*")))
+        file = open(filename, "rb")
+        simulation = pickle.load(file)
+        self.model_preview = simulation
+        self.refresh_model_preview()
+
+    def save_simulation(self):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        filename =  filedialog.asksaveasfilename(initialdir = dir_path,title = "Select file",filetypes = (("simulation files","*.sim"),("all files","*.*")))
+        filename = filename + ".sim"
+        with open(filename, "wb") as file:
+            pickle.dump(self.model_preview, file)
+
+    def refresh_model_preview(self):
+        self.model_preview.initialize_map()
+        im = Image.fromarray(self.model_preview.colormap)
+        w = int(im.width * self.scale)
+        h = int(im.height * self.scale)
+        img = im.resize((w, h), Image.ANTIALIAS)
+        self.canvas_image = ImageTk.PhotoImage(img)
+        self.canvas.itemconfigure(self.imageId, image=self.canvas_image)
+
 
     def generate_straight_road(self):
         try:
