@@ -1,12 +1,13 @@
 import math
-from Vec2D import Vec2D
+from src.vec_2d import Vec2D
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 ORANGE = (255, 165, 0)
 
+
 class TrafficLigth:
-    def __init__(self, N=7, offset=0, position = Vec2D()):
+    def __init__(self, N=7, offset=0, position=Vec2D()):
         self.N = N
         self.offset = offset
         self.currentColor = None
