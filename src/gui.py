@@ -2,22 +2,22 @@ import tkinter as tk
 import tkinter.messagebox as msg
 from tkinter import filedialog
 from math import floor, ceil
+from PIL import ImageTk, Image
+from datetime import datetime
+from copy import deepcopy
 import os
-
+import pickle
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-
-from Simulation import Simulation
-from resizer import fit_tk, array_to_tk
-from copy import deepcopy
-from PIL import ImageTk, Image
 import re
-from Cell import Cell
-from MeasurmentFlag import MeasurmentFlag
-from datetime import datetime
-from creator import *
-import pickle
+
+from src.simulation import Simulation
+from src.resizer import fit_tk, array_to_tk
+from src.cell import Cell
+from src.measurment_flag import MeasurmentFlag
+from src.creator import *
+
 
 class GUI:
     def __init__(self, master):
@@ -49,8 +49,9 @@ class GUI:
         # choose part
         self.currentlychosen = -1
         self.preview_scrollbar = tk.Scrollbar(self.master, orient=tk.VERTICAL)
-        self.part_options_listbox = tk.Listbox(self.master, selectmode=tk.SINGLE,
-                                               yscrollcommand=self.preview_scrollbar.set)
+        self.part_options_listbox = tk.Listbox(
+            self.master, selectmode=tk.SINGLE, yscrollcommand=self.preview_scrollbar.set
+        )
         self.preview_scrollbar.config(command=self.part_options_listbox.yview)
         self.preview_scrollbar.place(x=25, y=255, height=50)
         self.part_options_listbox.place(x=40, y=255, width=180, height=50)
@@ -65,15 +66,20 @@ class GUI:
         self.part_options_listbox.insert(8, "eraser")
         self.part_options_listbox.insert(9, "Measuring-flag")
         self.part_options_listbox.insert(10, "cross-section-X-lights")
-        self.load_button = tk.Button(master=self.master, text="Load model", command=self.load_part)
+        self.load_button = tk.Button(
+            master=self.master, text="Load model", command=self.load_part
+        )
         self.load_button.place(x=25, y=310)
         # straight road generation
         self.straight_road_width_label = tk.Label(self.master, text="Width")
         self.straight_road_length_label = tk.Label(self.master, text="Length")
-        self.straight_road_entry_width = tk.Entry(self.master)  # reused for eraser and measurment flag
+        self.straight_road_entry_width = tk.Entry(
+            self.master
+        )  # reused for eraser and measurment flag
         self.straight_road_entry_length = tk.Entry(self.master)
-        self.straight_road_generate_button = tk.Button(self.master, text="Generate road",
-                                                       command=self.generate_straight_road)
+        self.straight_road_generate_button = tk.Button(
+            self.master, text="Generate road", command=self.generate_straight_road
+        )
         self.straight_road_direction_label = tk.Label(self.master, text="Direction")
         self.straight_road_entry_direction = tk.Entry(self.master)
         # cars generator
@@ -86,30 +92,45 @@ class GUI:
         self.canvas_relwidth = 0.6
         self.canvas_relheight = 0.7
         self.model_preview = Simulation(500, 500, 50)
-        #load_simulation("data.sim")
+        # load_simulation("data.sim")
         self.model_preview.initialize_map()
         self.canvas_image = array_to_tk(self.model_preview.colormap)
         self.model_preview_desc = tk.Label(self.master, text="Preview of model")
         self.model_preview_desc.place(x=275, y=25)
         self.canvas_vertical_scroll = tk.Scrollbar(self.master, orient=tk.VERTICAL)
         self.canvas_horizontal_scroll = tk.Scrollbar(self.master, orient=tk.HORIZONTAL)
-        self.canvas = tk.Canvas(master=self.master, width=self.model_preview.cellmap.shape[1],
-                                height=self.model_preview.cellmap.shape[0], borderwidth=5,
-                                background='gray', yscrollcommand=self.canvas_vertical_scroll,
-                                xscrollcommand=self.canvas_horizontal_scroll,
-                                scrollregion=(0, 0, self.model_preview.cellmap.shape[1],
-                                              self.model_preview.cellmap.shape[0]))           
+        self.canvas = tk.Canvas(
+            master=self.master,
+            width=self.model_preview.cellmap.shape[1],
+            height=self.model_preview.cellmap.shape[0],
+            borderwidth=5,
+            background="gray",
+            yscrollcommand=self.canvas_vertical_scroll,
+            xscrollcommand=self.canvas_horizontal_scroll,
+            scrollregion=(
+                0,
+                0,
+                self.model_preview.cellmap.shape[1],
+                self.model_preview.cellmap.shape[0],
+            ),
+        )
         self.canvas_vertical_scroll.config(command=self.canvas.yview)
         self.canvas_horizontal_scroll.config(command=self.canvas.xview)
         self.canvas_vertical_scroll.place(x=275, y=75, relheight=self.canvas_relheight)
         self.canvas_horizontal_scroll.place(x=300, y=50, relwidth=self.canvas_relwidth)
-        self.canvas.place(x=300, y=75, relwidth=self.canvas_relwidth, relheight=self.canvas_relheight)
-        self.imageId = self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
+        self.canvas.place(
+            x=300, y=75, relwidth=self.canvas_relwidth, relheight=self.canvas_relheight
+        )
+        self.imageId = self.canvas.create_image(
+            0, 0, image=self.canvas_image, anchor=tk.NW
+        )
         self.canvas.bind("<Button-1>", self.place_part)
         self.canvas.bind("<MouseWheel>", self.do_zoom)
         self.canvas.bind("<Motion>", self.mouse_over_canvas)
         self.canvas.bind("<Leave>", self.mouse_leaves_canvas)
-        self.start_button = tk.Button(master=self.master, text="Start simulation", command=self.start_simulation)
+        self.start_button = tk.Button(
+            master=self.master, text="Start simulation", command=self.start_simulation
+        )
         self.start_button.place(x=470, y=20)
         # resize map
         self.resize_map_Label = tk.Label(self.master, text="Resize map")
@@ -117,24 +138,32 @@ class GUI:
         self.resize_map_Label_X = tk.Label(self.master, text="x")
         self.resize_map_Label_X.place(x=660, y=25)
         self.resize_map_Entry_X = tk.Entry(self.master)
-        self.resize_map_Entry_X.insert(0,str(len(self.model_preview.cellmap)))
+        self.resize_map_Entry_X.insert(0, str(len(self.model_preview.cellmap)))
         self.resize_map_Entry_X.place(x=675, y=25, width=30, height=20)
         self.resize_map_Label_Y = tk.Label(self.master, text="y")
         self.resize_map_Label_Y.place(x=715, y=25)
         self.resize_map_Entry_Y = tk.Entry(self.master)
-        self.resize_map_Entry_Y.insert(0,str(len(self.model_preview.cellmap[0])))
+        self.resize_map_Entry_Y.insert(0, str(len(self.model_preview.cellmap[0])))
         self.resize_map_Entry_Y.place(x=730, y=25, width=30, height=20)
-        self.resize_map_Button = tk.Button(master=self.master, text="Resize Map", command=self.resize_map)
+        self.resize_map_Button = tk.Button(
+            master=self.master, text="Resize Map", command=self.resize_map
+        )
         self.resize_map_Button.place(x=770, y=20)
         # eraser and measurment flag
-        self.eraser_resize_button = tk.Button(master=self.master, text="Resize tool", command=self.resize_eraser)  # reused for measurment flag
+        self.eraser_resize_button = tk.Button(
+            master=self.master, text="Resize tool", command=self.resize_eraser
+        )  # reused for measurment flag
         self.measurment_flags = []
         self.flagcolor = [0, 255, 255]
         # probability editor
         self.probability_value = 0
         self.is_editing_probability = False
 
-        self.edit_probability_button = tk.Button(master=self.master, text="Turn probability editing on", command=self.edit_turn_probability)
+        self.edit_probability_button = tk.Button(
+            master=self.master,
+            text="Turn probability editing on",
+            command=self.edit_turn_probability,
+        )
         self.edit_probability_button.place(x=850, y=20)
 
         self.edit_probability_entry = tk.Entry(self.master)
@@ -143,7 +172,11 @@ class GUI:
 
     def open_simulation(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        filename =  filedialog.askopenfilename(initialdir = dir_path, title = "Select file",filetypes = (("simulation files","*.sim"),("all files","*.*")))
+        filename = filedialog.askopenfilename(
+            initialdir=dir_path,
+            title="Select file",
+            filetypes=(("simulation files", "*.sim"), ("all files", "*.*")),
+        )
         file = open(filename, "rb")
         simulation = pickle.load(file)
         self.model_preview = simulation
@@ -151,7 +184,11 @@ class GUI:
 
     def save_simulation(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        filename =  filedialog.asksaveasfilename(initialdir = dir_path,title = "Select file",filetypes = (("simulation files","*.sim"),("all files","*.*")))
+        filename = filedialog.asksaveasfilename(
+            initialdir=dir_path,
+            title="Select file",
+            filetypes=(("simulation files", "*.sim"), ("all files", "*.*")),
+        )
         filename = filename + ".sim"
         with open(filename, "wb") as file:
             pickle.dump(self.model_preview, file)
@@ -165,40 +202,61 @@ class GUI:
         self.canvas_image = ImageTk.PhotoImage(img)
         self.canvas.itemconfigure(self.imageId, image=self.canvas_image)
 
-
     def generate_straight_road(self):
         try:
-            tmp = list(x.rstrip().lstrip() for x in self.straight_road_entry_direction.get().split(','))
+            tmp = list(
+                x.rstrip().lstrip()
+                for x in self.straight_road_entry_direction.get().split(",")
+            )
             assert len(tmp) < 3, msg.showerror("Error", "Too many axes")
             x = int(tmp[0])
             y = int(tmp[1])
-            assert -1 <= x <= 1 and -1 <= y <= 1, msg.showerror("Error", "Wrong direction, must be integer <-1:1>")
+            assert -1 <= x <= 1 and -1 <= y <= 1, msg.showerror(
+                "Error", "Wrong direction, must be integer <-1:1>"
+            )
             direction = Vec2D(x, y)
             width = int(self.straight_road_entry_width.get())
             length = int(self.straight_road_entry_length.get())
-            assert 0 < width <= 3 and 0 < length < self.model_preview.cellmap.shape[0] and length < \
-                self.model_preview.cellmap.shape[1], msg.showerror("Error", "Invalid length or width")
+            assert (
+                0 < width <= 3
+                and 0 < length < self.model_preview.cellmap.shape[0]
+                and length < self.model_preview.cellmap.shape[1]
+            ), msg.showerror("Error", "Invalid length or width")
             if width > 1:
                 assert width < length, msg.showerror("Error", "Invalid length or width")
             self.part_preview = Simulation(length, length)
 
             if direction.equal(Vec2D(1, 1)) or direction.equal(Vec2D(-1, -1)):
-                for i in range((width-1), length):
+                for i in range((width - 1), length):
                     for j in range(0, width):
-                        self.part_preview.cellmap[i-j, i+j-(width-1)].kind = "road"
-                        self.part_preview.cellmap[i-j, i+j-(width-1)].direction.append(direction)
+                        self.part_preview.cellmap[
+                            i - j, i + j - (width - 1)
+                        ].kind = "road"
+                        self.part_preview.cellmap[
+                            i - j, i + j - (width - 1)
+                        ].direction.append(direction)
             elif direction.equal(Vec2D(1, -1)) or direction.equal(Vec2D(-1, 1)):
-                for i in range((width-1), length):
+                for i in range((width - 1), length):
                     for j in range(0, width):
-                        self.part_preview.cellmap[i-j, -i-j-1+(width-1)].kind = "road"
-                        self.part_preview.cellmap[i-j, -i-j-1+(width-1)].direction.append(direction)
+                        self.part_preview.cellmap[
+                            i - j, -i - j - 1 + (width - 1)
+                        ].kind = "road"
+                        self.part_preview.cellmap[
+                            i - j, -i - j - 1 + (width - 1)
+                        ].direction.append(direction)
             elif direction.equal(Vec2D(0, 1)) or direction.equal(Vec2D(0, -1)):
-                for i in range(int(length/2) - floor(width/2), int(length/2) + ceil(width/2)):
+                for i in range(
+                    int(length / 2) - floor(width / 2),
+                    int(length / 2) + ceil(width / 2),
+                ):
                     for cell in self.part_preview.cellmap[i, :]:
                         cell.kind = "road"
                         cell.direction.append(direction)
             elif direction.equal(Vec2D(1, 0)) or direction.equal(Vec2D(-1, 0)):
-                for i in range(int(length / 2) - floor(width / 2), int(length / 2) + ceil(width / 2)):
+                for i in range(
+                    int(length / 2) - floor(width / 2),
+                    int(length / 2) + ceil(width / 2),
+                ):
                     for cell in self.part_preview.cellmap[:, i]:
                         cell.kind = "road"
                         cell.direction.append(direction)
@@ -214,7 +272,11 @@ class GUI:
     def make_preview(self):  # działa
         self.part_preview.initialize_map()
         # image = cv2.cvtColor(self.part_preview.colormap, cv2.COLOR_BGR2RGB)
-        f = fit_tk(self.part_preview.colormap, self.preview_Label.winfo_width(), self.preview_Label.winfo_height())
+        f = fit_tk(
+            self.part_preview.colormap,
+            self.preview_Label.winfo_width(),
+            self.preview_Label.winfo_height(),
+        )
         self.preview_Label.configure(image=f)
         self.preview_Label.image = f
 
@@ -224,14 +286,14 @@ class GUI:
             if self.currentlychosen != 8 and self.currentlychosen != 9:
                 self.straight_road_width_label.place_forget()
                 self.straight_road_entry_width.place_forget()
-                self.straight_road_entry_width.delete(0, 'end')
+                self.straight_road_entry_width.delete(0, "end")
                 self.eraser_resize_button.place_forget()
             self.straight_road_length_label.place_forget()
             self.straight_road_entry_length.place_forget()
             self.straight_road_direction_label.place_forget()
             self.straight_road_entry_direction.place_forget()
-            self.straight_road_entry_length.delete(0, 'end')
-            self.straight_road_entry_direction.delete(0, 'end')
+            self.straight_road_entry_length.delete(0, "end")
+            self.straight_road_entry_direction.delete(0, "end")
         if self.currentlychosen == 0:
             self.part_preview = Simulation(1, 1)
             self.make_preview()
@@ -278,16 +340,20 @@ class GUI:
             self.straight_road_width_label.place(x=25, y=350)
             self.straight_road_entry_width.place(x=100, y=350, width=50, height=25)
             self.straight_road_entry_width.insert(0, "50")
-            self.part_preview = Simulation(int(self.straight_road_entry_width.get()),
-                                           int(self.straight_road_entry_width.get()))
+            self.part_preview = Simulation(
+                int(self.straight_road_entry_width.get()),
+                int(self.straight_road_entry_width.get()),
+            )
             self.make_preview()
             self.eraser_resize_button.place(x=160, y=350, width=75, height=25)
         elif self.currentlychosen == 9:
             self.straight_road_width_label.place(x=25, y=350)
             self.straight_road_entry_width.place(x=100, y=350, width=50, height=25)
             self.straight_road_entry_width.insert(0, "50")
-            self.part_preview = Simulation(int(self.straight_road_entry_width.get()),
-                                           int(self.straight_road_entry_width.get()))
+            self.part_preview = Simulation(
+                int(self.straight_road_entry_width.get()),
+                int(self.straight_road_entry_width.get()),
+            )
             self.part_preview.colormap[:, :] = self.flagcolor
             self.make_preview()
             self.eraser_resize_button.place(x=160, y=350, width=75, height=25)
@@ -299,8 +365,8 @@ class GUI:
     def place_part(self, event):
         if self.is_editing_probability:
             canvas = event.widget
-            row = int(canvas.canvasy(event.y)/self.scale)
-            col = int(canvas.canvasx(event.x)/self.scale)
+            row = int(canvas.canvasy(event.y) / self.scale)
+            col = int(canvas.canvasx(event.x) / self.scale)
             if len(self.model_preview.cellmap[row, col].direction) == 2:
                 turn_probability = max(int(self.edit_probability_entry.get()), 0)
                 turn_probability = min(turn_probability, 100)
@@ -308,61 +374,114 @@ class GUI:
                 self.model_preview.cellmap[row, col].probability = turn_probability
         else:
             canvas = event.widget
-            row = int(canvas.canvasy(event.y)/self.scale)
-            col = int(canvas.canvasx(event.x)/self.scale)
+            row = int(canvas.canvasy(event.y) / self.scale)
+            col = int(canvas.canvasx(event.x) / self.scale)
             if self.currentlychosen == 8:
-                for y in range(0 if 0 > col-int(self.part_preview.cellmap.shape[0]/2) else col-int(self.part_preview.cellmap.shape[0]/2),
-                            self.model_preview.cellmap.shape[0] if self.model_preview.cellmap.shape[0] <
-                                                                    col+int(self.part_preview.cellmap.shape[0]/2)
-                                                                else col+int(self.part_preview.cellmap.shape[0]/2)):
-                    for x in range(0 if 0 > row-int(self.part_preview.cellmap.shape[1]/2) else row-int(self.part_preview.cellmap.shape[1]/2),
-                                self.model_preview.cellmap.shape[1] if self.model_preview.cellmap.shape[1] <
-                                row+int(self.part_preview.cellmap.shape[1]/2) else row+int(self.part_preview.cellmap.shape[1]/2)):
+                for y in range(
+                    0
+                    if 0 > col - int(self.part_preview.cellmap.shape[0] / 2)
+                    else col - int(self.part_preview.cellmap.shape[0] / 2),
+                    self.model_preview.cellmap.shape[0]
+                    if self.model_preview.cellmap.shape[0]
+                    < col + int(self.part_preview.cellmap.shape[0] / 2)
+                    else col + int(self.part_preview.cellmap.shape[0] / 2),
+                ):
+                    for x in range(
+                        0
+                        if 0 > row - int(self.part_preview.cellmap.shape[1] / 2)
+                        else row - int(self.part_preview.cellmap.shape[1] / 2),
+                        self.model_preview.cellmap.shape[1]
+                        if self.model_preview.cellmap.shape[1]
+                        < row + int(self.part_preview.cellmap.shape[1] / 2)
+                        else row + int(self.part_preview.cellmap.shape[1] / 2),
+                    ):
                         self.model_preview.cellmap[x, y] = Cell()
                         self.model_preview.colormap[x, y] = self.model_preview.nonecolor
             elif self.currentlychosen == 9:
-                if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
-                            row - int(self.part_preview.cellmap.shape[1]/2) < 0:
+                if (
+                    row + int(self.part_preview.cellmap.shape[1] / 2)
+                    > self.model_preview.cellmap.shape[1]
+                    or row - int(self.part_preview.cellmap.shape[1] / 2) < 0
+                ):
                     msg.showerror("Flag won't fit vertically")
                     return
-                if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
-                    col - int(self.part_preview.cellmap.shape[0]/2) < 0:
+                if (
+                    col + int(self.part_preview.cellmap.shape[0] / 2)
+                    > self.model_preview.cellmap.shape[0]
+                    or col - int(self.part_preview.cellmap.shape[0] / 2) < 0
+                ):
                     msg.showerror("Flag won't fit horizontally")
                     return
 
-                self.measurment_flags.append(MeasurmentFlag(Vec2D(row, col), int(self.straight_road_entry_width.get())))
+                self.measurment_flags.append(
+                    MeasurmentFlag(
+                        Vec2D(row, col), int(self.straight_road_entry_width.get())
+                    )
+                )
 
-                for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(self.part_preview.cellmap.shape[1]/2)):
-                    for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(self.part_preview.cellmap.shape[0]/2)):
-                        if np.array_equal(self.model_preview.colormap[x, y], self.model_preview.nonecolor):
+                for x in range(
+                    row - int(self.part_preview.cellmap.shape[1] / 2),
+                    row + int(self.part_preview.cellmap.shape[1] / 2),
+                ):
+                    for y in range(
+                        col - int(self.part_preview.cellmap.shape[0] / 2),
+                        col + int(self.part_preview.cellmap.shape[0] / 2),
+                    ):
+                        if np.array_equal(
+                            self.model_preview.colormap[x, y],
+                            self.model_preview.nonecolor,
+                        ):
                             self.model_preview.colormap[x, y] = self.flagcolor
                 return
             else:
-                if row + int(self.part_preview.cellmap.shape[1]/2) > self.model_preview.cellmap.shape[1] or \
-                            row - int(self.part_preview.cellmap.shape[1]/2) < 0:
+                if (
+                    row + int(self.part_preview.cellmap.shape[1] / 2)
+                    > self.model_preview.cellmap.shape[1]
+                    or row - int(self.part_preview.cellmap.shape[1] / 2) < 0
+                ):
                     msg.showerror("Part won't fit vertically")
                     return
-                if col + int(self.part_preview.cellmap.shape[0]/2) > self.model_preview.cellmap.shape[0] or \
-                    col - int(self.part_preview.cellmap.shape[0]/2) < 0:
+                if (
+                    col + int(self.part_preview.cellmap.shape[0] / 2)
+                    > self.model_preview.cellmap.shape[0]
+                    or col - int(self.part_preview.cellmap.shape[0] / 2) < 0
+                ):
                     msg.showerror("Part won't fit horizontally")
                     return
                 part_preview = deepcopy(self.part_preview)
 
-                for x in range(row-int(self.part_preview.cellmap.shape[1]/2), row+int(part_preview.cellmap.shape[1]/2)):
-                    for y in range(col-int(self.part_preview.cellmap.shape[0]/2), col+int(part_preview.cellmap.shape[0]/2)):
+                for x in range(
+                    row - int(self.part_preview.cellmap.shape[1] / 2),
+                    row + int(part_preview.cellmap.shape[1] / 2),
+                ):
+                    for y in range(
+                        col - int(self.part_preview.cellmap.shape[0] / 2),
+                        col + int(part_preview.cellmap.shape[0] / 2),
+                    ):
                         modelcell = self.model_preview.cellmap[x, y]
-                        partcell = part_preview.cellmap[x-row+int(part_preview.cellmap.shape[0]/2), y-col+int(part_preview.cellmap.shape[1]/2)]
+                        partcell = part_preview.cellmap[
+                            x - row + int(part_preview.cellmap.shape[0] / 2),
+                            y - col + int(part_preview.cellmap.shape[1] / 2),
+                        ]
                         if partcell.trafficLight is not None:
                             modelcell.trafficLight = partcell.trafficLight
                             modelcell.trafficLight.position = Vec2D(x, y)
-                            self.model_preview.trafficLights.append(modelcell.trafficLight)
+                            self.model_preview.trafficLights.append(
+                                modelcell.trafficLight
+                            )
                         if modelcell.kind is None and partcell.kind is not None:
                             self.model_preview.cellmap[x, y] = partcell
-                            self.model_preview.colormap[x, y] = self.model_preview.roadcolor
+                            self.model_preview.colormap[
+                                x, y
+                            ] = self.model_preview.roadcolor
                         elif modelcell.kind == "road" and partcell.kind == "road":
                             for dire in partcell.direction:
-                                if not any(dire.equal(direc) for direc in modelcell.direction):
-                                    self.model_preview.cellmap[x, y].direction.append(Vec2D(dire.x, dire.y))
+                                if not any(
+                                    dire.equal(direc) for direc in modelcell.direction
+                                ):
+                                    self.model_preview.cellmap[x, y].direction.append(
+                                        Vec2D(dire.x, dire.y)
+                                    )
 
             self.model_preview.initialize_map()
             # image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
@@ -390,7 +509,7 @@ class GUI:
         img = im.resize((w, h), Image.NEAREST)
         self.canvas_image = ImageTk.PhotoImage(img)
         self.canvas.itemconfigure(self.imageId, image=self.canvas_image)
-        self.canvas.scale('all', 0, 0, tmpScale, tmpScale)
+        self.canvas.scale("all", 0, 0, tmpScale, tmpScale)
         self.canvas.configure(scrollregion=(0, 0, w, h))
 
     def mouse_over_canvas(self, event):
@@ -398,26 +517,32 @@ class GUI:
             canvas = event.widget
             model_image = self.model_preview.colormap.copy()
             if self.is_editing_probability:
-                row = int(canvas.canvasy(event.y)/self.scale)
-                col = int(canvas.canvasx(event.x)/self.scale)
+                row = int(canvas.canvasy(event.y) / self.scale)
+                col = int(canvas.canvasx(event.x) / self.scale)
                 if len(self.model_preview.cellmap[row, col].direction) == 2:
                     # podswietlenie komorki
                     model_image[row, col] = self.model_preview.slowcolor
                     img = Image.fromarray(model_image)
                     self.canvas_image = ImageTk.PhotoImage(img)
-                    self.canvas.create_image(0, 0, image=self.canvas_image, anchor=tk.NW)
+                    self.canvas.create_image(
+                        0, 0, image=self.canvas_image, anchor=tk.NW
+                    )
 
             else:
                 [part_size_x, part_size_y, _] = self.part_preview.colormap.shape
                 # row = int(canvas.canvasy(event.y) - part_size_x/2)
                 # col = int(canvas.canvasx(event.x) - part_size_y/2)
-                row = int(canvas.canvasy(event.y)/self.scale - part_size_x/2)
-                col = int(canvas.canvasx(event.x)/self.scale - part_size_y/2)
+                row = int(canvas.canvasy(event.y) / self.scale - part_size_x / 2)
+                col = int(canvas.canvasx(event.x) / self.scale - part_size_y / 2)
                 part_preview_image = self.part_preview.colormap.copy()
 
                 try:
-                    model_image_crop = model_image[row:row+part_size_x, col:col+part_size_y]
-                    roads_index = np.logical_not(part_preview_image == self.model_preview.nonecolor)
+                    model_image_crop = model_image[
+                        row : row + part_size_x, col : col + part_size_y
+                    ]
+                    roads_index = np.logical_not(
+                        part_preview_image == self.model_preview.nonecolor
+                    )
                     model_image_crop[roads_index] = part_preview_image[roads_index]
                 except:
                     pass
@@ -469,19 +594,39 @@ class GUI:
                         # axes.append(fig.add_subplot(n_vecs, 1, i+1))
                         vec = list([0 for _ in range(100)])
                         datavecs.append(vec)
-                        file_handles.append(open(self.model_preview.dt_string + "\\flag" + str(i) + ".csv", "a"))  # append only write mode
+                        file_handles.append(
+                            open(
+                                self.model_preview.dt_string
+                                + "\\flag"
+                                + str(i)
+                                + ".csv",
+                                "a",
+                            )
+                        )  # append only write mode
                 while True:
                     if len(self.model_preview.cars) < cars_number:
                         self.model_preview.add_car(idx=car_num)
-                        car_num = (car_num+1) % cars_number
+                        car_num = (car_num + 1) % cars_number
                     self.model_preview.step(cars_number)
                     self.model_preview.print_map("Map")
                     if n_vecs > 0:
                         for i in range(n_vecs):
                             flag = self.measurment_flags[i]
-                            n_slow = np.sum(np.all(self.model_preview.colormap[flag.pos.x - int(flag.size/2): flag.pos.x + int(flag.size/2),
-                                            flag.pos.y - int(flag.size/2): flag.pos.y + int(flag.size/2)] == self.model_preview.slowcolor, axis=2))
-                            file_handles[i].write(str(n_slow)+", ")
+                            n_slow = np.sum(
+                                np.all(
+                                    self.model_preview.colormap[
+                                        flag.pos.x
+                                        - int(flag.size / 2) : flag.pos.x
+                                        + int(flag.size / 2),
+                                        flag.pos.y
+                                        - int(flag.size / 2) : flag.pos.y
+                                        + int(flag.size / 2),
+                                    ]
+                                    == self.model_preview.slowcolor,
+                                    axis=2,
+                                )
+                            )
+                            file_handles[i].write(str(n_slow) + ", ")
                             # datavecs[i].pop(0)
                             # datavecs[i].append(n_slow)
                             # axes[i].clear()
@@ -492,64 +637,100 @@ class GUI:
                     if k == 27:
                         cv2.destroyAllWindows()
                         break
-                file_handle_quiver = open(self.model_preview.dt_string+"\\quiverdata.csv", "r")
+                file_handle_quiver = open(
+                    self.model_preview.dt_string + "\\quiverdata.csv", "r"
+                )
                 lines = file_handle_quiver.readlines()
                 for line in lines:
                     data = line.split(",")
-                    ax2.quiver(float(data[0]),
-                               float(data[1]),
-                               float(data[2]),
-                               float(data[3]),
-                               scale=5.0,
-                               scale_units="inches",
-                               headwidth=1,
-                               headlength=1)
+                    ax2.quiver(
+                        float(data[0]),
+                        float(data[1]),
+                        float(data[2]),
+                        float(data[3]),
+                        scale=5.0,
+                        scale_units="inches",
+                        headwidth=1,
+                        headlength=1,
+                    )
                 fig1 = plt.figure()
                 axes1 = fig1.subplots(1, 2)
                 self.model_preview.print_heatmap(axes1)
                 for i in range(n_vecs):
                     file_handles[i].close()
                 plt.show()
-       
+
     def resize_map(self):
         x = int(self.resize_map_Entry_X.get())
         y = int(self.resize_map_Entry_Y.get())
-        if (x != len(self.model_preview.cellmap)) or (y != len(self.model_preview.cellmap[0])):
+        if (x != len(self.model_preview.cellmap)) or (
+            y != len(self.model_preview.cellmap[0])
+        ):
             self.canvas.configure(width=x, height=y, scrollregion=(0, 0, y, x))
             if x < len(self.model_preview.cellmap):
                 self.model_preview.cellmap = self.model_preview.cellmap[0:x, :]
                 self.model_preview.colormap = self.model_preview.colormap[0:x, :, :]
             elif x > len(self.model_preview.cellmap):
                 toAdd = x - len(self.model_preview.cellmap)
-                row_to_be_added = np.array([list(Cell() for _ in range(len(self.model_preview.cellmap))) for _ in range(toAdd)])
+                row_to_be_added = np.array(
+                    [
+                        list(Cell() for _ in range(len(self.model_preview.cellmap)))
+                        for _ in range(toAdd)
+                    ]
+                )
                 result = np.vstack((self.model_preview.cellmap, row_to_be_added))
                 self.model_preview.cellmap = result
                 # colormap
                 toAdd = x - len(self.model_preview.colormap)
-                b = np.full([len(self.model_preview.colormap)+toAdd, len(self.model_preview.colormap[0]), 3], 255, dtype=np.uint8)
-                b[:-toAdd:, :, ] = self.model_preview.colormap
-                self.model_preview.colormap = b 
+                b = np.full(
+                    [
+                        len(self.model_preview.colormap) + toAdd,
+                        len(self.model_preview.colormap[0]),
+                        3,
+                    ],
+                    255,
+                    dtype=np.uint8,
+                )
+                b[:-toAdd:, :,] = self.model_preview.colormap
+                self.model_preview.colormap = b
             if y < len(self.model_preview.cellmap[0]):
                 self.model_preview.cellmap = self.model_preview.cellmap[:, 0:y]
                 self.model_preview.colormap = self.model_preview.colormap[:, 0:y, :]
             elif y > len(self.model_preview.cellmap[0]):
                 toAdd = y - len(self.model_preview.cellmap[0])
-                column_to_be_added = np.array([list(Cell() for _ in range(toAdd)) for _ in range(len(self.model_preview.cellmap))])
-                result = np.column_stack((self.model_preview.cellmap, column_to_be_added)) 
+                column_to_be_added = np.array(
+                    [
+                        list(Cell() for _ in range(toAdd))
+                        for _ in range(len(self.model_preview.cellmap))
+                    ]
+                )
+                result = np.column_stack(
+                    (self.model_preview.cellmap, column_to_be_added)
+                )
                 self.model_preview.cellmap = result
                 # colormap
                 toAdd = y - len(self.model_preview.colormap[0])
-                b = np.full([len(self.model_preview.colormap), len(self.model_preview.colormap[0])+toAdd, 3], 255, dtype=np.uint8)
-                b[:, :-toAdd:, ] = self.model_preview.colormap
-                self.model_preview.colormap = b 
+                b = np.full(
+                    [
+                        len(self.model_preview.colormap),
+                        len(self.model_preview.colormap[0]) + toAdd,
+                        3,
+                    ],
+                    255,
+                    dtype=np.uint8,
+                )
+                b[:, :-toAdd:,] = self.model_preview.colormap
+                self.model_preview.colormap = b
         else:
-            return                    
+            return
 
     def resize_eraser(self):
         try:
             width = int(self.straight_road_entry_width.get())
-            assert self.model_preview.cellmap.shape[0] > width > 0 and width < self.model_preview.cellmap.shape[1], \
-                msg.showerror("Error", "Incorrect width")
+            assert (
+                self.model_preview.cellmap.shape[0] > width > 0
+                and width < self.model_preview.cellmap.shape[1]
+            ), msg.showerror("Error", "Incorrect width")
             self.part_preview = Simulation(width, width)
             if self.currentlychosen == 9:
                 self.part_preview.colormap[:, :] = self.flagcolor
@@ -562,9 +743,17 @@ class GUI:
             return
 
     def edit_turn_probability(self):
-        self.is_editing_probability = not self.is_editing_probability 
+        self.is_editing_probability = not self.is_editing_probability
         if self.is_editing_probability:
-            self.edit_probability_button = tk.Button(master=self.master, text="Turn probability editing off", command=self.edit_turn_probability)
+            self.edit_probability_button = tk.Button(
+                master=self.master,
+                text="Turn probability editing off",
+                command=self.edit_turn_probability,
+            )
         else:
-            self.edit_probability_button = tk.Button(master=self.master, text="Turn probability editing on", command=self.edit_turn_probability)
+            self.edit_probability_button = tk.Button(
+                master=self.master,
+                text="Turn probability editing on",
+                command=self.edit_turn_probability,
+            )
         self.edit_probability_button.place(x=850, y=20)

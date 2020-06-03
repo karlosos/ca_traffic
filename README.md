@@ -1,6 +1,14 @@
 # Cellular Automata Traffic Simulation
 
-Simulating traffic with cellular automata. Creating roads systems and 
+Simulating traffic with cellular automata. Creating roads systems and measure traffic.
+
+Main window with editor:
+
+![https://i.imgur.com/8GCigcr.png](https://i.imgur.com/8GCigcr.png)
+
+Simulation window:
+
+![https://i.imgur.com/2FbZJqf.png](https://i.imgur.com/2FbZJqf.png)
 
 ## Usage
 

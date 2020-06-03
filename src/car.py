@@ -1,4 +1,4 @@
-from Vec2D import Vec2D
+from src.vec_2d import Vec2D
 
 
 class Car:
