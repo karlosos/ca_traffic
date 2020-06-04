@@ -51,6 +51,7 @@ class Simulation:
         if starting_point is None:
             self.starting_point = []
         self.dt_string = ""
+        self.car_distances = None
 
     def print_map(self, window):  # działa
         text = (
@@ -119,6 +120,8 @@ class Simulation:
         self.cars.append(car)
 
     def step(self, cars_number):  # działa
+        if self.car_distances is None:
+            self.car_distances = [0] * cars_number
         self.currentIteration += 1
         toRemove = []
         self.slow_cars = 0
@@ -143,10 +146,10 @@ class Simulation:
             if car.velocity == 0 and (
                 (
                     self.cellmap[nextCellPos.x, nextCellPos.y].car is None
-                    and car.flag == False
+                    and car.flag is False
                 )
                 or (
-                    car.flag == True
+                    car.flag is True
                     and self.cellmap[
                         potentialTrafficLightPosition[0],
                         potentialTrafficLightPosition[1],
@@ -304,6 +307,7 @@ class Simulation:
                     car.velocity = self.cellmap[newpos.x, newpos.y].car.velocity
                     self.colormap[car.position.x, car.position.y] = self.slowcolor
                     self.slow_cars += 1
+                    cell.jammed += 1
                     if self.slow_cars > self.max_slow_cars:
                         self.max_slow_cars = self.slow_cars
                     break
@@ -319,11 +323,11 @@ class Simulation:
                 self.cellmap[car.position.x, car.position.y].car = car
                 car.oldDirection = direction
 
-            car.distance_traveled += jumps
+            self.car_distances[car.idx] += jumps
             if self.currentIteration >= cars_number:
                 file_handle_quiver = open(self.dt_string + "\\quiverdata.csv", "a")
                 file_handle_quiver.write(
-                    str(car.idx * 4 + car.distance_traveled)
+                    str(car.idx * 4 + self.car_distances[car.idx])
                     + ","
                     + str(self.currentIteration)
                     + ","
@@ -374,15 +378,18 @@ class Simulation:
             self.starting_point.remove(pos)
 
     def print_heatmap(self, axes):
-        heatmap = np.zeros_like(self.cellmap, dtype=np.uint16)
-        for x in range(heatmap.shape[0]):
-            for y in range(heatmap.shape[1]):
-                heatmap[x, y] = self.cellmap[x, y].visited
+        heatmap_accessed = np.zeros_like(self.cellmap, dtype=np.uint16)
+        heatmap_jammed = np.zeros_like(self.cellmap, dtype=np.uint16)
+        for x in range(heatmap_accessed.shape[0]):
+            for y in range(heatmap_accessed.shape[1]):
+                heatmap_accessed[x, y] = self.cellmap[x, y].visited
+                heatmap_jammed[x, y] = self.cellmap[x, y].jammed
         # plt.figure()
         # plt.subplot(121)
-        axes[0] = axes[0].imshow(
+        axes[0, 0] = axes[0, 0].imshow(
             X=np.array(self.colormap, dtype=np.uint8), aspect="auto"
         )
         # plt.subplot(122)
-        axes[1] = sns.heatmap(heatmap)
+        sns.heatmap(heatmap_accessed, ax=axes[0, 1])
+        sns.heatmap(heatmap_jammed, ax=axes[1, 1])
         # plt.show()
