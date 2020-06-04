@@ -7,11 +7,12 @@ ORANGE = (255, 165, 0)
 
 
 class TrafficLigth:
-    def __init__(self, N=7, offset=0, position=Vec2D()):
+    def __init__(self, N=7, offset=0, dir=Vec2D(), position=Vec2D()):
         self.N = N
         self.offset = offset
         self.currentColor = None
         self.position = position
+        self.direction = dir
         if self.offset % self.N < math.ceil(3 * self.N / 7):
             self.currentColor = GREEN
         elif self.offset % self.N < math.ceil(4 * self.N / 7):
