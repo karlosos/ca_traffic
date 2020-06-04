@@ -66,6 +66,10 @@ class GUI:
         self.part_options_listbox.insert(8, "eraser")
         self.part_options_listbox.insert(9, "Measuring-flag")
         self.part_options_listbox.insert(10, "cross-section-X-lights")
+        self.part_options_listbox.insert(11, "cross-section-T-up-lights")
+        self.part_options_listbox.insert(12, "cross-section-T-down-lights")
+        self.part_options_listbox.insert(13, "cross-section-T-left-lights")
+        self.part_options_listbox.insert(14, "cross-section-T-right-lights")
         self.load_button = tk.Button(
             master=self.master, text="Load model", command=self.load_part
         )
@@ -360,6 +364,22 @@ class GUI:
         elif self.currentlychosen == 10:
             self.part_preview = Simulation(100, 100)
             create_cross_section_x_light(self.part_preview)
+            self.make_preview()
+        elif self.currentlychosen == 11:
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_t_up_light(self.part_preview)
+            self.make_preview()
+        elif self.currentlychosen == 12:
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_t_down_light(self.part_preview)
+            self.make_preview()
+        elif self.currentlychosen == 13:
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_t_left_light(self.part_preview)
+            self.make_preview()
+        elif self.currentlychosen == 14:
+            self.part_preview = Simulation(100, 100)
+            create_cross_section_t_right_light(self.part_preview)
             self.make_preview()
 
     def place_part(self, event):

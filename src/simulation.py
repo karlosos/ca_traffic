@@ -168,7 +168,6 @@ class Simulation:
                         nextCellPos.x - car.oldDirection.y,
                         nextCellPos.y - car.oldDirection.x,
                     ]
-                potentialTrafficLightPosition2 = car.oldDirection.mul_int(4)
                 cell = self.cellmap[car.position.x, car.position.y]
                 if (
                     self.cellmap[
@@ -177,12 +176,9 @@ class Simulation:
                     ].trafficLight
                     is not None
                     and self.cellmap[
-                        potentialTrafficLightPosition[0]
-                        + potentialTrafficLightPosition2.x,
-                        potentialTrafficLightPosition[1]
-                        + potentialTrafficLightPosition2.y,
-                    ].trafficLight
-                    is not None
+                        potentialTrafficLightPosition[0],
+                        potentialTrafficLightPosition[1],
+                    ].trafficLight.direction.equal(car.oldDirection)
                     and self.cellmap[
                         potentialTrafficLightPosition[0],
                         potentialTrafficLightPosition[1],
