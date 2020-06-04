@@ -9,3 +9,4 @@ class Cell:
         self.direction = direction
         self.visited = 0
         self.probability = None
+        self.jammed = 0

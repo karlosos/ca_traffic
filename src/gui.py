@@ -174,6 +174,13 @@ class GUI:
         self.edit_probability_entry.insert(0, str(self.probability_value))
         self.edit_probability_entry.place(x=1010, y=25, width=20)
 
+        #max iters
+        self.max_iters = tk.Entry(self.master)
+        self.max_iters_label = tk.Label(self.master, text="Max steps")
+        self.max_iters_label.place(x=275, y=0)
+        self.max_iters.place(x=350, y=0, height=20)
+        self.max_iters.insert(0, 10000)
+
     def open_simulation(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         filename = filedialog.askopenfilename(
@@ -583,6 +590,13 @@ class GUI:
         return
 
     def start_simulation(self):  # działa
+        try:
+            max_iters = int(self.max_iters.get())
+            if max_iters < 1:
+                max_iters = int('inf')
+        except ValueError:
+            msg.showerror("Error", "Number of iterations must be an integer")
+            return
         check_string = self.cars_entry.get()
         car_num = 0
         if re.match("^[0-9]+$", check_string):
@@ -597,12 +611,17 @@ class GUI:
                 file_handles = []
                 axes = []
                 # fig = plt.figure()
+                fig1 = plt.figure()
+                axes1 = fig1.subplots(2, 2)
+                plt.subplots_adjust(hspace=0.5)
+                axes1[0, 0].set_title("Final simulation step")
+                axes1[0, 1].set_title("Traffic movement heatmap")
+                axes1[1, 0].set_title("Tempo-spatial plot")
+                axes1[1, 1].set_title("Traffic jams heatmap")
                 n_vecs = len(self.measurment_flags)
                 now = datetime.now()
                 dt_string = now.strftime("%d-%m-%Y %H;%M;%S")
                 self.model_preview.dt_string = "Measurements\\" + dt_string
-                fig2 = plt.figure()
-                ax2 = fig2.subplots()
                 try:
                     # Create target Directory
                     os.mkdir(self.model_preview.dt_string)
@@ -623,7 +642,7 @@ class GUI:
                                 "a",
                             )
                         )  # append only write mode
-                while True:
+                while self.model_preview.currentIteration < max_iters:
                     if len(self.model_preview.cars) < cars_number:
                         self.model_preview.add_car(idx=car_num)
                         car_num = (car_num + 1) % cars_number
@@ -657,13 +676,14 @@ class GUI:
                     if k == 27:
                         cv2.destroyAllWindows()
                         break
+                cv2.destroyAllWindows()
                 file_handle_quiver = open(
                     self.model_preview.dt_string + "\\quiverdata.csv", "r"
                 )
                 lines = file_handle_quiver.readlines()
                 for line in lines:
                     data = line.split(",")
-                    ax2.quiver(
+                    axes1[1, 0].quiver(
                         float(data[0]),
                         float(data[1]),
                         float(data[2]),
@@ -673,8 +693,7 @@ class GUI:
                         headwidth=1,
                         headlength=1,
                     )
-                fig1 = plt.figure()
-                axes1 = fig1.subplots(1, 2)
+
                 self.model_preview.print_heatmap(axes1)
                 for i in range(n_vecs):
                     file_handles[i].close()
