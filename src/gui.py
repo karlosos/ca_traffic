@@ -70,6 +70,8 @@ class GUI:
         self.part_options_listbox.insert(12, "cross-section-T-down-lights")
         self.part_options_listbox.insert(13, "cross-section-T-left-lights")
         self.part_options_listbox.insert(14, "cross-section-T-right-lights")
+        self.part_options_listbox.insert(15, "traffic light")
+        self.part_options_listbox.insert(16, "priority")
         self.load_button = tk.Button(
             master=self.master, text="Load model", command=self.load_part
         )
@@ -180,6 +182,10 @@ class GUI:
         self.max_iters_label.place(x=275, y=0)
         self.max_iters.place(x=350, y=0, height=20)
         self.max_iters.insert(0, 10000)
+
+        #traffic light
+        self.defaultCycleLen = 98
+        self.defaultOffsetLen = 0
 
     def open_simulation(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -299,6 +305,7 @@ class GUI:
                 self.straight_road_entry_width.place_forget()
                 self.straight_road_entry_width.delete(0, "end")
                 self.eraser_resize_button.place_forget()
+            self.straight_road_width_label.configure(text="Width")
             self.straight_road_length_label.place_forget()
             self.straight_road_entry_length.place_forget()
             self.straight_road_direction_label.place_forget()
@@ -308,6 +315,8 @@ class GUI:
         if self.currentlychosen == 0:
             self.part_preview = Simulation(1, 1)
             self.make_preview()
+            self.straight_road_width_label.configure(text="Width")
+            self.straight_road_length_label.configure(text="Length")
             self.straight_road_width_label.place(x=25, y=350)
             self.straight_road_entry_width.place(x=100, y=350, width=50, height=25)
             self.straight_road_entry_width.insert(0, "1")
@@ -388,6 +397,26 @@ class GUI:
             self.part_preview = Simulation(100, 100)
             create_cross_section_t_right_light(self.part_preview)
             self.make_preview()
+        elif self.currentlychosen == 15:
+            self.part_preview = Simulation(1, 1)
+            trafficlightsetup(self.part_preview)
+            self.make_preview()
+            self.straight_road_width_label.place(x=25, y=350)
+            self.straight_road_width_label.configure(text="Cycle")
+            self.straight_road_length_label.configure(text="Offset")
+            self.straight_road_entry_width.place(x=100, y=350, width=50, height=25)
+            self.straight_road_entry_width.insert(0, str(self.defaultCycleLen))
+            self.straight_road_length_label.place(x=25, y=400)
+            self.straight_road_entry_length.place(x=100, y=400, width=50, height=25)
+            self.straight_road_entry_length.insert(0, str(self.defaultOffsetLen))
+            self.straight_road_direction_label.place(x=25, y=450)
+            self.straight_road_entry_direction.place(x=100, y=450, width=50, height=25)
+            self.straight_road_entry_direction.insert(0, "1,1")
+            self.straight_road_generate_button.place(x=175, y=400)
+        elif self.currentlychosen == 16:
+            self.part_preview = Simulation(1, 1)
+            prioritysetup(self.part_preview)
+            self.make_preview()
 
     def place_part(self, event):
         if self.is_editing_probability:
@@ -460,6 +489,77 @@ class GUI:
                         ):
                             self.model_preview.colormap[x, y] = self.flagcolor
                 return
+            elif self.currentlychosen == 15:
+                try:
+                    cycleLen = int(self.straight_road_entry_width.get())
+                    offset = int(self.straight_road_entry_length.get())
+                    tmp = list(
+                        x.rstrip().lstrip()
+                        for x in self.straight_road_entry_direction.get().split(",")
+                    )
+                    assert len(tmp) < 3, msg.showerror("Error", "Too many axes")
+                    x = int(tmp[0])
+                    y = int(tmp[1])
+                    assert -1 <= x <= 1 and -1 <= y <= 1, msg.showerror(
+                        "Error", "Wrong direction, must be integer <-1:1>"
+                    )
+                    direction = Vec2D(x, y)
+                    if direction.x == 1 and direction.y == 0 and self.model_preview.cellmap[row, col+1].kind == "road":
+                        tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
+                        self.model_preview.cellmap[row, col].trafficLight = tl
+                        self.model_preview.colormap[row, col] = tl.currentColor
+                        self.model_preview.trafficLights.append(tl)
+                    elif direction.x == -1 and direction.y == 0 and self.model_preview.cellmap[row, col-1].kind == "road":
+                        tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
+                        self.model_preview.cellmap[row, col].trafficLight = tl
+                        self.model_preview.colormap[row, col] = tl.currentColor
+                        self.model_preview.trafficLights.append(tl)
+                    elif direction.x == 0 and direction.y == 1 and self.model_preview.cellmap[row-1, col].kind == "road":
+                        tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
+                        self.model_preview.cellmap[row, col].trafficLight = tl
+                        self.model_preview.colormap[row, col] = tl.currentColor
+                        self.model_preview.trafficLights.append(tl)
+                    elif direction.x == 0 and direction.y == -1 and self.model_preview.cellmap[row+1, col].kind == "road":
+                        tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
+                        self.model_preview.cellmap[row, col].trafficLight = tl
+                        self.model_preview.colormap[row, col] = tl.currentColor
+                        self.model_preview.trafficLights.append(tl)
+                    elif direction.x == 1 and direction.y == 1 and self.model_preview.cellmap[row-1, col+1].kind == "road":
+                        tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
+                        self.model_preview.cellmap[row, col].trafficLight = tl
+                        self.model_preview.colormap[row, col] = tl.currentColor
+                        self.model_preview.trafficLights.append(tl)
+                    elif direction.x == -1 and direction.y == -1 and self.model_preview.cellmap[row+1, col-1].kind == "road":
+                        tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
+                        self.model_preview.cellmap[row, col].trafficLight = tl
+                        self.model_preview.colormap[row, col] = tl.currentColor
+                        self.model_preview.trafficLights.append(tl)
+                    elif direction.x == -1 and direction.y == 1 and self.model_preview.cellmap[row+1, col+1].kind == "road":
+                        tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
+                        self.model_preview.cellmap[row, col].trafficLight = tl
+                        self.model_preview.colormap[row, col] = tl.currentColor
+                        self.model_preview.trafficLights.append(tl)
+                    elif direction.x == 1 and direction.y == -1 and self.model_preview.cellmap[row-1, col-1].kind == "road":
+                        tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
+                        self.model_preview.cellmap[row, col].trafficLight = tl
+                        self.model_preview.colormap[row, col] = tl.currentColor
+                        self.model_preview.trafficLights.append(tl)
+                    else:
+                        msg.showinfo("Information", "Bad placement")
+                        return
+
+                except ValueError:
+                    msg.showerror("Error", "Values must be integers")
+                    return
+                except AssertionError:
+                    pass
+
+            elif self.currentlychosen == 16:
+                if self.model_preview.cellmap[row, col].kind == "road":
+                    if self.model_preview.cellmap[row, col].priority is False:
+                        self.model_preview.cellmap[row, col].priority = True
+                    else:
+                        self.model_preview.cellmap[row, col].priority = False
             else:
                 if (
                     row + int(self.part_preview.cellmap.shape[1] / 2)

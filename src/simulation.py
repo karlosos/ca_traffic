@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 from src.car import Car
 from src.cell import Cell
 from src.vec_2d import Vec2D
-from src.traffic_lights import TrafficLigth, RED, GREEN, ORANGE
+from src.traffic_lights import TrafficLight, RED, GREEN, ORANGE
+
 
 class Simulation:
     def __init__(
@@ -22,6 +23,7 @@ class Simulation:
         sidecolor=None,
         nonecolor=None,
         slowcolor=None,
+        prioritycolor=None
     ):
         if roadcolor is None:
             roadcolor = np.array([125, 125, 125], dtype=np.uint8)
@@ -33,6 +35,8 @@ class Simulation:
             nonecolor = np.array([255, 255, 255], dtype=np.uint8)
         if slowcolor is None:
             slowcolor = np.array([255, 0, 0], dtype=np.uint8)
+        if prioritycolor is None:
+            prioritycolor = np.array([150, 150, 90], dtype=np.uint8)
         self.cellmap = np.array(
             [list(Cell() for _ in range(sizeX)) for _ in range(sizeY)]
         )
@@ -45,6 +49,7 @@ class Simulation:
         self.sidecolor = sidecolor
         self.nonecolor = nonecolor
         self.slowcolor = slowcolor
+        self.prioritycolor = prioritycolor
         self.slow_cars = 0
         self.max_slow_cars = 0
         self.currentIteration = 0
@@ -84,8 +89,13 @@ class Simulation:
                 if self.cellmap[row, col].kind == "road":
                     if self.cellmap[row, col].car is not None:
                         self.colormap[row, col] = self.carcolor
+                    elif self.cellmap[row, col].trafficLight is not None:
+                        self.colormap[row, col] = self.cellmap[row, col].trafficLight.currentColor
                     else:
-                        self.colormap[row, col] = self.roadcolor
+                        if self.cellmap[row, col].priority is False:
+                            self.colormap[row, col] = self.roadcolor
+                        else:
+                            self.colormap[row, col] = self.prioritycolor
                 elif (
                     self.cellmap[row, col].kind == "side"
                     and self.cellmap[row, col].trafficLight is None
@@ -133,14 +143,8 @@ class Simulation:
         for car in self.cars:
             jumps = 0
             nextCellPos = car.position.add(car.oldDirection)
-            if abs(car.oldDirection.y) == 1:
-                potentialTrafficLightPosition = [
+            potentialTrafficLightPosition = [
                     car.position.x + car.oldDirection.y,
-                    car.position.y + car.oldDirection.x,
-                ]
-            else:
-                potentialTrafficLightPosition = [
-                    car.position.x - car.oldDirection.y,
                     car.position.y - car.oldDirection.x,
                 ]
             if car.velocity == 0 and (
@@ -159,7 +163,7 @@ class Simulation:
             ):
                 car.velocity = car.defaultvelocity
                 car.flag = False
-            for i in range(car.velocity):
+            for _ in range(car.velocity):
                 nextCellPos = car.position.add(car.oldDirection)
                 if abs(car.oldDirection.y) == 1:
                     potentialTrafficLightPosition = [
@@ -315,7 +319,10 @@ class Simulation:
                     car.velocity = car.defaultvelocity
 
                 jumps += 1
-                self.colormap[car.position.x, car.position.y] = self.roadcolor
+                if self.cellmap[car.position.x, car.position.y].priority is False:
+                    self.colormap[car.position.x, car.position.y] = self.roadcolor
+                else:
+                    self.colormap[car.position.x, car.position.y] = self.prioritycolor
                 cell.car = None
                 car.position = newpos
 
