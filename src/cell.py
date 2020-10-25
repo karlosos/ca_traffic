@@ -1,5 +1,5 @@
 class Cell:
-    def __init__(self, car=None, kind=None, direction=None, trafficLight=None):
+    def __init__(self, car=None, kind=None, direction=None, trafficLight=None, priority=False):
         if direction is None:
             direction = []
 
@@ -10,3 +10,4 @@ class Cell:
         self.visited = 0
         self.probability = None
         self.jammed = 0
+        self.priority = False

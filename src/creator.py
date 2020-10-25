@@ -1,5 +1,5 @@
 from src.vec_2d import Vec2D
-from src.traffic_lights import TrafficLigth
+from src.traffic_lights import TrafficLight
 
 
 def create_roundabout(mp):
@@ -516,10 +516,10 @@ def create_cross_section_x_light(mp):
     for cell in mp.cellmap[:, 51]:
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
-    mp.cellmap[48, 52].trafficLight = TrafficLigth(98, 58, Vec2D(0, -1))
-    mp.cellmap[52, 48].trafficLight = TrafficLigth(98, 58, Vec2D(0, 1))
-    mp.cellmap[48, 48].trafficLight = TrafficLigth(98, 0, Vec2D(1, 0))
-    mp.cellmap[52, 52].trafficLight = TrafficLigth(98, 0, Vec2D(-1, 0))
+    mp.cellmap[48, 52].trafficLight = TrafficLight(98, 58, Vec2D(0, -1))
+    mp.cellmap[52, 48].trafficLight = TrafficLight(98, 58, Vec2D(0, 1))
+    mp.cellmap[48, 48].trafficLight = TrafficLight(98, 0, Vec2D(1, 0))
+    mp.cellmap[52, 52].trafficLight = TrafficLight(98, 0, Vec2D(-1, 0))
 
 
 def create_cross_section_t_up(mp):
@@ -610,9 +610,9 @@ def create_cross_section_t_up_light(mp):
     for cell in mp.cellmap[2:, 51]:
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
-    mp.cellmap[0, 52].trafficLight = TrafficLigth(98, 58, Vec2D(0, -1))
-    mp.cellmap[4, 48].trafficLight = TrafficLigth(98, 58, Vec2D(0, 1))
-    mp.cellmap[4, 52].trafficLight = TrafficLigth(98, 0, Vec2D(-1, 0))
+    mp.cellmap[0, 52].trafficLight = TrafficLight(98, 58, Vec2D(0, -1))
+    mp.cellmap[4, 48].trafficLight = TrafficLight(98, 58, Vec2D(0, 1))
+    mp.cellmap[4, 52].trafficLight = TrafficLight(98, 0, Vec2D(-1, 0))
 
 
 def create_cross_section_t_down_light(mp):
@@ -631,9 +631,9 @@ def create_cross_section_t_down_light(mp):
     for cell in mp.cellmap[:98, 51]:
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
-    mp.cellmap[95, 52].trafficLight = TrafficLigth(98, 58, Vec2D(0, -1))
-    mp.cellmap[99, 48].trafficLight = TrafficLigth(98, 58, Vec2D(0, 1))
-    mp.cellmap[95, 48].trafficLight = TrafficLigth(98, 0, Vec2D(1, 0))
+    mp.cellmap[95, 52].trafficLight = TrafficLight(98, 58, Vec2D(0, -1))
+    mp.cellmap[99, 48].trafficLight = TrafficLight(98, 58, Vec2D(0, 1))
+    mp.cellmap[95, 48].trafficLight = TrafficLight(98, 0, Vec2D(1, 0))
 
 
 def create_cross_section_t_left_light(mp):
@@ -652,9 +652,10 @@ def create_cross_section_t_left_light(mp):
     for cell in mp.cellmap[:, 3]:
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
-    mp.cellmap[48, 0].trafficLight = TrafficLigth(98, 0, Vec2D(1, 0))
-    mp.cellmap[48, 4].trafficLight = TrafficLigth(98, 58, Vec2D(0, -1))
-    mp.cellmap[52, 4].trafficLight = TrafficLigth(98, 0, Vec2D(-1, 0))
+    mp.cellmap[48, 0].trafficLight = TrafficLight(98, 0, Vec2D(1, 0))
+    mp.cellmap[48, 4].trafficLight = TrafficLight(98, 58, Vec2D(0, -1))
+    mp.cellmap[52, 4].trafficLight = TrafficLight(98, 0, Vec2D(-1, 0))
+
 
 def create_cross_section_t_right_light(mp):
     for cell in mp.cellmap[49, :98]:
@@ -672,6 +673,15 @@ def create_cross_section_t_right_light(mp):
     for cell in mp.cellmap[:, 98]:
         cell.kind = "road"
         cell.direction.append(Vec2D(-1, 0))
-    mp.cellmap[52, 95].trafficLight = TrafficLigth(98, 58, Vec2D(0, 1))
-    mp.cellmap[52, 99].trafficLight = TrafficLigth(98, 0, Vec2D(-1, 0))
-    mp.cellmap[48, 95].trafficLight = TrafficLigth(98, 0, Vec2D(1, 0))
+    mp.cellmap[52, 95].trafficLight = TrafficLight(98, 58, Vec2D(0, 1))
+    mp.cellmap[52, 99].trafficLight = TrafficLight(98, 0, Vec2D(-1, 0))
+    mp.cellmap[48, 95].trafficLight = TrafficLight(98, 0, Vec2D(1, 0))
+
+
+def trafficlightsetup(mp):
+    mp.cellmap[0, 0].trafficLight = TrafficLight(98, 0)
+
+
+def prioritysetup(mp):
+    mp.cellmap[0, 0].kind = "road"
+    mp.cellmap[0, 0].priority = True

@@ -23,3 +23,6 @@ class Vec2D:
             return True
         else:
             return False
+
+    def perpendicular_clockwise(self):
+        return Vec2D(self.y, -self.x)
