@@ -4,6 +4,7 @@ from random import randrange, choice
 import math
 import seaborn as sns
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
 from src.car import Car
 from src.cell import Cell
@@ -306,6 +307,28 @@ class Simulation:
                             newpos = choice(c)
                 except IndexError:
                     pass
+                # here
+                priorityflag = False
+                if self.cellmap[car.position.x, car.position.y].priority is not True:
+                    if self.cellmap[newpos.x, newpos.y].priority is True:
+                        for dir in self.cellmap[newpos.x, newpos.y].direction:
+                            currX = deepcopy(newpos.x) - dir.x
+                            currY = deepcopy(newpos.y) - dir.y
+                            for _ in range(4):
+                                if self.cellmap[currX, currY].priority is False:
+                                    break
+                                elif self.cellmap[currX, currY].car is not None:
+                                    priorityflag = True
+                                    break
+                                currX -= self.cellmap[currX, currY].direction[0].x
+                                currY -= self.cellmap[currX, currY].direction[0].y
+                if priorityflag is True:
+                    self.colormap[car.position.x, car.position.y] = self.slowcolor
+                    self.slow_cars += 1
+                    cell.jammed += 1
+                    if self.slow_cars > self.max_slow_cars:
+                        self.max_slow_cars = self.slow_cars
+                    break
 
                 if self.cellmap[newpos.x, newpos.y].car is not None:
                     car.velocity = self.cellmap[newpos.x, newpos.y].car.velocity
