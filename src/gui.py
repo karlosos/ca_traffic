@@ -508,41 +508,73 @@ class GUI:
                         tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
                         self.model_preview.cellmap[row, col].trafficLight = tl
                         self.model_preview.colormap[row, col] = tl.currentColor
+                        toRm = next((x for x in self.model_preview.trafficLights if x.position.equal(Vec2D(row, col))),
+                                    None)
+                        if toRm is not None:
+                            self.model_preview.trafficLights.remove(toRm)
                         self.model_preview.trafficLights.append(tl)
                     elif direction.x == -1 and direction.y == 0 and self.model_preview.cellmap[row, col-1].kind == "road":
                         tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
                         self.model_preview.cellmap[row, col].trafficLight = tl
                         self.model_preview.colormap[row, col] = tl.currentColor
+                        toRm = next((x for x in self.model_preview.trafficLights if x.position.equal(Vec2D(row, col))),
+                                    None)
+                        if toRm is not None:
+                            self.model_preview.trafficLights.remove(toRm)
                         self.model_preview.trafficLights.append(tl)
                     elif direction.x == 0 and direction.y == 1 and self.model_preview.cellmap[row-1, col].kind == "road":
                         tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
                         self.model_preview.cellmap[row, col].trafficLight = tl
                         self.model_preview.colormap[row, col] = tl.currentColor
+                        toRm = next((x for x in self.model_preview.trafficLights if x.position.equal(Vec2D(row, col))),
+                                    None)
+                        if toRm is not None:
+                            self.model_preview.trafficLights.remove(toRm)
                         self.model_preview.trafficLights.append(tl)
                     elif direction.x == 0 and direction.y == -1 and self.model_preview.cellmap[row+1, col].kind == "road":
                         tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
                         self.model_preview.cellmap[row, col].trafficLight = tl
                         self.model_preview.colormap[row, col] = tl.currentColor
+                        toRm = next((x for x in self.model_preview.trafficLights if x.position.equal(Vec2D(row, col))),
+                                    None)
+                        if toRm is not None:
+                            self.model_preview.trafficLights.remove(toRm)
                         self.model_preview.trafficLights.append(tl)
                     elif direction.x == 1 and direction.y == 1 and self.model_preview.cellmap[row-1, col+1].kind == "road":
                         tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
                         self.model_preview.cellmap[row, col].trafficLight = tl
                         self.model_preview.colormap[row, col] = tl.currentColor
+                        toRm = next((x for x in self.model_preview.trafficLights if x.position.equal(Vec2D(row, col))),
+                                    None)
+                        if toRm is not None:
+                            self.model_preview.trafficLights.remove(toRm)
                         self.model_preview.trafficLights.append(tl)
                     elif direction.x == -1 and direction.y == -1 and self.model_preview.cellmap[row+1, col-1].kind == "road":
                         tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
                         self.model_preview.cellmap[row, col].trafficLight = tl
                         self.model_preview.colormap[row, col] = tl.currentColor
+                        toRm = next((x for x in self.model_preview.trafficLights if x.position.equal(Vec2D(row, col))),
+                                    None)
+                        if toRm is not None:
+                            self.model_preview.trafficLights.remove(toRm)
                         self.model_preview.trafficLights.append(tl)
                     elif direction.x == -1 and direction.y == 1 and self.model_preview.cellmap[row+1, col+1].kind == "road":
                         tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
                         self.model_preview.cellmap[row, col].trafficLight = tl
                         self.model_preview.colormap[row, col] = tl.currentColor
+                        toRm = next((x for x in self.model_preview.trafficLights if x.position.equal(Vec2D(row, col))),
+                                    None)
+                        if toRm is not None:
+                            self.model_preview.trafficLights.remove(toRm)
                         self.model_preview.trafficLights.append(tl)
                     elif direction.x == 1 and direction.y == -1 and self.model_preview.cellmap[row-1, col-1].kind == "road":
                         tl = TrafficLight(N=cycleLen, offset=offset, dir=direction, position=Vec2D(row, col))
                         self.model_preview.cellmap[row, col].trafficLight = tl
                         self.model_preview.colormap[row, col] = tl.currentColor
+                        toRm = next((x for x in self.model_preview.trafficLights if x.position.equal(Vec2D(row, col))),
+                                    None)
+                        if toRm is not None:
+                            self.model_preview.trafficLights.remove(toRm)
                         self.model_preview.trafficLights.append(tl)
                     else:
                         msg.showinfo("Information", "Bad placement")
