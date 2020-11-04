@@ -404,8 +404,11 @@ class Simulation:
                         for dire in cell.direction
                     ):
                         to_remove.append(pos)
-        for pos in to_remove:
-            self.starting_point.remove(pos)
+        try:
+            for pos in to_remove:
+                self.starting_point.remove(pos)
+        except ValueError:
+            pass
 
     def print_heatmap(self, axes):
         heatmap_accessed = np.zeros_like(self.cellmap, dtype=np.uint16)
