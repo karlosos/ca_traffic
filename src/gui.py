@@ -642,10 +642,13 @@ class GUI:
                                         Vec2D(dire.x, dire.y)
                                     )
                                     for di in self.model_preview.cellmap[x, y].direction:
+                                        addx = x + di.x
+                                        addy = y + di.y
                                         addxpart = x - row + int(part_preview.cellmap.shape[0] / 2) + di.x
                                         addypart = y - col + int(part_preview.cellmap.shape[1] / 2) + di.y
                                         try:
-                                            if self.part_preview.cellmap[addxpart, addypart].kind != "road":
+                                            if self.part_preview.cellmap[addxpart, addypart].kind != "road" \
+                                                    and self.model_preview.cellmap[addx, addy].kind != "road":
                                                 self.model_preview.cellmap[x, y].direction.remove(di)
                                         except IndexError:
                                             self.model_preview.cellmap[x, y].direction.remove(di)
