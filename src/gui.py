@@ -641,7 +641,14 @@ class GUI:
                                     self.model_preview.cellmap[x, y].direction.append(
                                         Vec2D(dire.x, dire.y)
                                     )
-
+                                    for di in self.model_preview.cellmap[x, y].direction:
+                                        addxpart = x - row + int(part_preview.cellmap.shape[0] / 2) + di.x
+                                        addypart = y - col + int(part_preview.cellmap.shape[1] / 2) + di.y
+                                        try:
+                                            if self.part_preview.cellmap[addxpart, addypart].kind != "road":
+                                                self.model_preview.cellmap[x, y].direction.remove(di)
+                                        except IndexError:
+                                            self.model_preview.cellmap[x, y].direction.remove(di)
             self.model_preview.initialize_map()
             # image = cv2.cvtColor(self.model_preview.colormap, cv2.COLOR_BGR2RGB)
             im = Image.fromarray(self.model_preview.colormap)
