@@ -24,7 +24,8 @@ class Simulation:
         sidecolor=None,
         nonecolor=None,
         slowcolor=None,
-        prioritycolor=None
+        prioritycolor=None,
+        startingcolor=None
     ):
         if roadcolor is None:
             roadcolor = np.array([125, 125, 125], dtype=np.uint8)
@@ -38,6 +39,8 @@ class Simulation:
             slowcolor = np.array([255, 0, 0], dtype=np.uint8)
         if prioritycolor is None:
             prioritycolor = np.array([150, 150, 90], dtype=np.uint8)
+        if startingcolor is None:
+            startingcolor = np.array([255, 150, 90], dtype=np.uint8)
         self.cellmap = np.array(
             [list(Cell() for _ in range(sizeX)) for _ in range(sizeY)]
         )
@@ -51,6 +54,7 @@ class Simulation:
         self.nonecolor = nonecolor
         self.slowcolor = slowcolor
         self.prioritycolor = prioritycolor
+        self.startingcolor = startingcolor
         self.slow_cars = 0
         self.max_slow_cars = 0
         self.currentIteration = 0
@@ -106,6 +110,8 @@ class Simulation:
                     self.colormap[row, col] = np.array(
                         self.cellmap[row, col].trafficLight.currentColor, dtype=np.uint8
                     )
+        for p in self.starting_point:
+            self.colormap[p.x, p.y] = self.startingcolor
 
     def cellmap_outline_roads(self):  # działa
         for row in range(1, self.cellmap.shape[0] - 1):
@@ -129,6 +135,16 @@ class Simulation:
         car = Car(position=pos, velocity=choice([1, 2, 3, 4]), idx=idx)
         self.cellmap[pos.x, pos.y].car = car
         self.cars.append(car)
+
+    def modify_starting_point(self, vec):
+        for p in self.starting_point:
+            if p.equal(vec):
+                self.colormap[p.x, p.y] = self.roadcolor
+                self.starting_point.remove(p)
+                return
+
+        self.starting_point.append(vec)
+        self.colormap[vec.x, vec.y] = self.startingcolor
 
     def step(self, cars_number):  # działa
         if self.car_distances is None:

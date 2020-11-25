@@ -72,6 +72,7 @@ class GUI:
         self.part_options_listbox.insert(14, "cross-section-T-right-lights")
         self.part_options_listbox.insert(15, "traffic light")
         self.part_options_listbox.insert(16, "priority")
+        self.part_options_listbox.insert(17, "starting_point")
         self.load_button = tk.Button(
             master=self.master, text="Load model", command=self.load_part
         )
@@ -417,6 +418,10 @@ class GUI:
             self.part_preview = Simulation(1, 1)
             prioritysetup(self.part_preview)
             self.make_preview()
+        elif self.currentlychosen == 17:
+            self.part_preview = Simulation(1, 1)
+            self.part_preview.starting_point.append(Vec2D(0, 0))
+            self.make_preview()
 
     def place_part(self, event):
         if self.is_editing_probability:
@@ -592,6 +597,12 @@ class GUI:
                         self.model_preview.cellmap[row, col].priority = True
                     else:
                         self.model_preview.cellmap[row, col].priority = False
+
+            elif self.currentlychosen == 17:
+                if self.model_preview.cellmap[row, col].kind == "road":
+                    self.model_preview.modify_starting_point(Vec2D(row, col))
+                else:
+                    msg.showerror("Error", "Target must be a road")
             else:
                 if (
                     row + int(self.part_preview.cellmap.shape[1] / 2)
@@ -748,7 +759,7 @@ class GUI:
                 cv2.resizeWindow("Map", 1280, 800)
                 self.model_preview.cellmap_outline_roads()
                 self.model_preview.initialize_map()
-                self.model_preview.find_starting_point()
+                # self.model_preview.find_starting_point()
                 datavecs = []
                 file_handles = []
                 axes = []
@@ -819,22 +830,22 @@ class GUI:
                         cv2.destroyAllWindows()
                         break
                 cv2.destroyAllWindows()
-                file_handle_quiver = open(
-                    self.model_preview.dt_string + "\\quiverdata.csv", "r"
-                )
-                lines = file_handle_quiver.readlines()
-                for line in lines:
-                    data = line.split(",")
-                    axes1[1, 0].quiver(
-                        float(data[0]),
-                        float(data[1]),
-                        float(data[2]),
-                        float(data[3]),
-                        scale=5.0,
-                        scale_units="inches",
-                        headwidth=1,
-                        headlength=1,
-                    )
+                # file_handle_quiver = open(
+                #     self.model_preview.dt_string + "\\quiverdata.csv", "r"
+                # )
+                # lines = file_handle_quiver.readlines()
+                # for line in lines:
+                #     data = line.split(",")
+                #     axes1[1, 0].quiver(
+                #         float(data[0]),
+                #         float(data[1]),
+                #         float(data[2]),
+                #         float(data[3]),
+                #         scale=5.0,
+                #         scale_units="inches",
+                #         headwidth=1,
+                #         headlength=1,
+                #     )
 
                 self.model_preview.print_heatmap(axes1)
                 for i in range(n_vecs):
