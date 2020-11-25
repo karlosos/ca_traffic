@@ -111,7 +111,10 @@ class Simulation:
                         self.cellmap[row, col].trafficLight.currentColor, dtype=np.uint8
                     )
         for p in self.starting_point:
-            self.colormap[p.x, p.y] = self.startingcolor
+            try:
+                self.colormap[p.x, p.y] = self.startingcolor
+            except AttributeError:
+                self.colormap[p.x, p.y] = [255, 150, 90]
 
     def cellmap_outline_roads(self):  # działa
         for row in range(1, self.cellmap.shape[0] - 1):
@@ -144,7 +147,10 @@ class Simulation:
                 return
 
         self.starting_point.append(vec)
-        self.colormap[vec.x, vec.y] = self.startingcolor
+        try:
+            self.colormap[vec.x, vec.y] = self.startingcolor
+        except AttributeError:
+            self.colormap[vec.x, vec.y] = [255, 150, 90]
 
     def step(self, cars_number):  # działa
         if self.car_distances is None:
