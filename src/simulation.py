@@ -10,6 +10,7 @@ from src.car import Car
 from src.cell import Cell
 from src.vec_2d import Vec2D
 from src.traffic_lights import TrafficLight, RED, GREEN, ORANGE
+from src.flow_flag import flow_flag
 
 
 class Simulation:
@@ -25,7 +26,9 @@ class Simulation:
         nonecolor=None,
         slowcolor=None,
         prioritycolor=None,
-        startingcolor=None
+        startingcolor=None,
+        entriescolor=None,
+        exitscolor=None
     ):
         if roadcolor is None:
             roadcolor = np.array([125, 125, 125], dtype=np.uint8)
@@ -41,6 +44,10 @@ class Simulation:
             prioritycolor = np.array([150, 150, 90], dtype=np.uint8)
         if startingcolor is None:
             startingcolor = np.array([255, 150, 90], dtype=np.uint8)
+        if entriescolor is None:
+            entriescolor = np.array([250, 150, 250], dtype=np.uint8)
+        if exitscolor is None:
+            exitscolor = np.array([90, 250, 250], dtype=np.uint8)
         self.cellmap = np.array(
             [list(Cell() for _ in range(sizeX)) for _ in range(sizeY)]
         )
@@ -55,6 +62,8 @@ class Simulation:
         self.slowcolor = slowcolor
         self.prioritycolor = prioritycolor
         self.startingcolor = startingcolor
+        self.entriescolor = entriescolor
+        self.exitscolor = exitscolor
         self.slow_cars = 0
         self.max_slow_cars = 0
         self.currentIteration = 0
@@ -62,6 +71,7 @@ class Simulation:
             self.starting_point = []
         self.dt_string = ""
         self.car_distances = None
+        self.flow_flags = []
 
     def print_map(self, window):  # działa
         text = (
@@ -187,6 +197,13 @@ class Simulation:
                 car.velocity = car.defaultvelocity
                 car.flag = False
             for _ in range(car.velocity):
+                # checking flags
+                for fl in self.flow_flags:
+                    if any(car.position.equal(entry) for entry in fl.entries):
+                        fl.total_entered += 1
+                    if any(car.position.equal(ex) for ex in fl.exits):
+                        fl.total_exit += 1
+                # run
                 nextCellPos = car.position.add(car.oldDirection)
                 if abs(car.oldDirection.y) == 1:
                     potentialTrafficLightPosition = [
