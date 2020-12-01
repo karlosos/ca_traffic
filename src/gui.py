@@ -17,6 +17,7 @@ from src.resizer import fit_tk, array_to_tk
 from src.cell import Cell
 from src.measurment_flag import MeasurmentFlag
 from src.creator import *
+from src.flow_flag import flow_flag
 
 
 class GUI:
@@ -73,6 +74,7 @@ class GUI:
         self.part_options_listbox.insert(15, "traffic light")
         self.part_options_listbox.insert(16, "priority")
         self.part_options_listbox.insert(17, "starting_point")
+        self.part_options_listbox.insert(18, "Part flow measurment")
         self.load_button = tk.Button(
             master=self.master, text="Load model", command=self.load_part
         )
@@ -161,7 +163,7 @@ class GUI:
             master=self.master, text="Resize tool", command=self.resize_eraser
         )  # reused for measurment flag
         self.measurment_flags = []
-        self.flagcolor = [0, 255, 255]
+        self.flagcolor = np.array([50, 0, 250], dtype=np.uint8)
         # probability editor
         self.probability_value = 0
         self.is_editing_probability = False
@@ -367,7 +369,7 @@ class GUI:
             )
             self.make_preview()
             self.eraser_resize_button.place(x=160, y=350, width=75, height=25)
-        elif self.currentlychosen == 9:
+        elif self.currentlychosen == 9 or self.currentlychosen == 18:
             self.straight_road_width_label.place(x=25, y=350)
             self.straight_road_entry_width.place(x=100, y=350, width=50, height=25)
             self.straight_road_entry_width.insert(0, "50")
@@ -458,7 +460,7 @@ class GUI:
                     ):
                         self.model_preview.cellmap[x, y] = Cell()
                         self.model_preview.colormap[x, y] = self.model_preview.nonecolor
-            elif self.currentlychosen == 9:
+            elif self.currentlychosen == 9 or self.currentlychosen == 18:
                 if (
                     row + int(self.part_preview.cellmap.shape[1] / 2)
                     > self.model_preview.cellmap.shape[1]
@@ -473,12 +475,58 @@ class GUI:
                 ):
                     msg.showerror("Flag won't fit horizontally")
                     return
-
-                self.measurment_flags.append(
-                    MeasurmentFlag(
-                        Vec2D(row, col), int(self.straight_road_entry_width.get())
+                if self.currentlychosen == 9:
+                    self.measurment_flags.append(
+                        MeasurmentFlag(
+                            Vec2D(row, col), int(self.straight_road_entry_width.get())
+                        )
                     )
-                )
+                elif self.currentlychosen == 18:
+                    flag = flow_flag([row - int(self.part_preview.cellmap.shape[1] / 2),
+                               col - int(self.part_preview.cellmap.shape[0] / 2),
+                               row + int(self.part_preview.cellmap.shape[1] / 2),
+                               col + int(self.part_preview.cellmap.shape[0] / 2)])
+                    for x in range(flag.bbox[0], flag.bbox[2]):
+                        y1 = flag.bbox[1]
+                        y2 = flag.bbox[3]-1
+                        sel = self.model_preview.cellmap[x, y1]
+                        sel2 = self.model_preview.cellmap[x, y2]
+                        if sel.kind == "road" and len(sel.direction) == 1:
+                            if sel.direction[0].y == -1:
+                                flag.exits.append(Vec2D(x, y1))
+                                self.model_preview.colormap[x, y1] = self.model_preview.exitscolor
+                            elif sel.direction[0].y == 1:
+                                flag.entries.append(Vec2D(x, y1))
+                                self.model_preview.colormap[x, y1] = self.model_preview.entriescolor
+                        if sel2.kind == "road" and len(sel2.direction) == 1:
+                            if sel2.direction[0].y == 1:
+                                flag.exits.append(Vec2D(x, y2))
+                                self.model_preview.colormap[x, y2] = self.model_preview.exitscolor
+                            elif sel2.direction[0].y == -1:
+                                flag.entries.append(Vec2D(x, y2))
+                                self.model_preview.colormap[x, y2] = self.model_preview.entriescolor
+
+                    for y in range(flag.bbox[1], flag.bbox[3]):
+                        x1 = flag.bbox[0]
+                        x2 = flag.bbox[2]-1
+                        sel = self.model_preview.cellmap[x1, y]
+                        sel2 = self.model_preview.cellmap[x2, y]
+                        if sel.kind == "road" and len(sel.direction) == 1:
+                            if sel.direction[0].x == -1:
+                                flag.exits.append(Vec2D(x1, y))
+                                self.model_preview.colormap[x1, y] = self.model_preview.exitscolor
+                            elif sel.direction[0].x == 1:
+                                flag.entries.append(Vec2D(x1, y))
+                                self.model_preview.colormap[x1, y] = self.model_preview.entriescolor
+                        if sel2.kind == "road" and len(sel2.direction) == 1:
+                            if sel2.direction[0].x == 1:
+                                flag.exits.append(Vec2D(x2, y))
+                                self.model_preview.colormap[x2, y] = self.model_preview.exitscolor
+                            elif sel2.direction[0].x == -1:
+                                flag.entries.append(Vec2D(x2, y))
+                                self.model_preview.colormap[x2, y] = self.model_preview.entriescolor
+
+                    self.model_preview.flow_flags.append(deepcopy(flag))
 
                 for x in range(
                     row - int(self.part_preview.cellmap.shape[1] / 2),
@@ -658,9 +706,9 @@ class GUI:
                                         addxpart = x - row + int(part_preview.cellmap.shape[0] / 2) + di.x
                                         addypart = y - col + int(part_preview.cellmap.shape[1] / 2) + di.y
                                         try:
-                                            if self.part_preview.cellmap[addxpart, addypart].kind != "road" \
-                                                    and self.model_preview.cellmap[addx, addy].kind != "road":
-                                                self.model_preview.cellmap[x, y].direction.remove(di)
+                                            if self.model_preview.cellmap[addx, addy].kind != "road":
+                                                if self.part_preview.cellmap[addxpart, addypart].kind != "road":
+                                                    self.model_preview.cellmap[x, y].direction.remove(di)
                                         except IndexError:
                                             self.model_preview.cellmap[x, y].direction.remove(di)
             self.model_preview.initialize_map()
@@ -762,9 +810,10 @@ class GUI:
                 # self.model_preview.find_starting_point()
                 datavecs = []
                 file_handles = []
+                flow_flags_handles = []
                 axes = []
                 # fig = plt.figure()
-                fig1 = plt.figure()
+                fig1 = plt.figure(figsize=(18, 10))
                 axes1 = fig1.subplots(2, 2)
                 plt.subplots_adjust(hspace=0.5)
                 axes1[0, 0].set_title("Final simulation step")
@@ -795,12 +844,29 @@ class GUI:
                                 "a",
                             )
                         )  # append only write mode
+
+                # flow flags
+                if len(self.model_preview.flow_flags) > 0:
+                    for j in range(len(self.model_preview.flow_flags)):
+                        flow_flags_handles.append(open(
+                            self.model_preview.dt_string
+                            + "\\flow_flag"
+                            + str(j)
+                            + ".csv",
+                            "a"
+                        ))
+                        flow_flags_handles[j].write("Total_entry;Total_exit\n")
+                # simulation
                 while self.model_preview.currentIteration < max_iters:
                     if len(self.model_preview.cars) < cars_number:
                         self.model_preview.add_car(idx=car_num)
                         car_num = (car_num + 1) % cars_number
                     self.model_preview.step(cars_number)
                     self.model_preview.print_map("Map")
+                    if len(self.model_preview.flow_flags) > 0:
+                        for j in range(len(self.model_preview.flow_flags)):
+                            fl = self.model_preview.flow_flags[j]
+                            flow_flags_handles[j].write(str(fl.total_entered)+";"+str(fl.total_exit)+"\n")
                     if n_vecs > 0:
                         for i in range(n_vecs):
                             flag = self.measurment_flags[i]
@@ -850,6 +916,9 @@ class GUI:
                 self.model_preview.print_heatmap(axes1)
                 for i in range(n_vecs):
                     file_handles[i].close()
+                for j in range(len(self.model_preview.flow_flags)):
+                    flow_flags_handles[j].close()
+                fig1.savefig(self.model_preview.dt_string+"\\figure.png", format='png', dpi=300)
                 plt.show()
 
     def resize_map(self):
@@ -924,7 +993,7 @@ class GUI:
                 and width < self.model_preview.cellmap.shape[1]
             ), msg.showerror("Error", "Incorrect width")
             self.part_preview = Simulation(width, width)
-            if self.currentlychosen == 9:
+            if self.currentlychosen == 9 or self.currentlychosen == 18:
                 self.part_preview.colormap[:, :] = self.flagcolor
 
         except ValueError:
