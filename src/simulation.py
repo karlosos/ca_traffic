@@ -197,12 +197,6 @@ class Simulation:
                 car.velocity = car.defaultvelocity
                 car.flag = False
             for _ in range(car.velocity):
-                # checking flags
-                for fl in self.flow_flags:
-                    if any(car.position.equal(entry) for entry in fl.entries):
-                        fl.total_entered += 1
-                    if any(car.position.equal(ex) for ex in fl.exits):
-                        fl.total_exit += 1
                 # run
                 nextCellPos = car.position.add(car.oldDirection)
                 if abs(car.oldDirection.y) == 1:
@@ -346,7 +340,7 @@ class Simulation:
                             newpos = choice(c)
                 except IndexError:
                     pass
-                # here
+
                 priorityflag = False
                 if self.cellmap[car.position.x, car.position.y].priority is not True:
                     if self.cellmap[newpos.x, newpos.y].priority is True:
@@ -381,6 +375,12 @@ class Simulation:
                     car.velocity = car.defaultvelocity
 
                 jumps += 1
+                # checking flags
+                for fl in self.flow_flags:
+                    if any(car.position.equal(entry) for entry in fl.entries):
+                        fl.total_entered += 1
+                    if any(car.position.equal(ex) for ex in fl.exits):
+                        fl.total_exit += 1
                 if self.cellmap[car.position.x, car.position.y].priority is False:
                     self.colormap[car.position.x, car.position.y] = self.roadcolor
                 else:
