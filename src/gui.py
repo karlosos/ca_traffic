@@ -199,7 +199,21 @@ class GUI:
         )
         file = open(filename, "rb")
         simulation = pickle.load(file)
-        self.model_preview = simulation
+        self.model_preview = Simulation(simulation.cellmap.shape[0], simulation.cellmap.shape[1])
+        try:
+            self.model_preview.flow_flags = simulation.flow_flags
+        except AttributeError:
+            pass
+        try:
+            self.model_preview.trafficLights = simulation.trafficLights
+        except AttributeError:
+            pass
+        try:
+            self.model_preview.starting_point = simulation.starting_point
+        except AttributeError:
+            pass
+        self.model_preview.cellmap = simulation.cellmap
+        self.model_preview.colormap = simulation.colormap
         self.refresh_model_preview()
 
     def save_simulation(self):
@@ -918,7 +932,7 @@ class GUI:
                     file_handles[i].close()
                 for j in range(len(self.model_preview.flow_flags)):
                     flow_flags_handles[j].close()
-                fig1.savefig(self.model_preview.dt_string+"\\figure.png", format='png', dpi=300)
+                fig1.savefig(self.model_preview.dt_string+"\\figure.png", format='png', dpi=600)
                 plt.show()
 
     def resize_map(self):
