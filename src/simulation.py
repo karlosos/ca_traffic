@@ -13,6 +13,55 @@ from src.traffic_lights import TrafficLight, RED, GREEN, ORANGE
 from src.flow_flag import flow_flag
 
 
+def recursive_priority_search(cellmap, pos, depth):
+    if depth > 4:
+        return False
+    elif cellmap[pos.x, pos.y].priority is not True:
+        return False
+    elif cellmap[pos.x, pos.y].car is not None:
+        return True
+    else:
+        cell = cellmap[pos.x, pos.y]
+        if len(cell.direction) == 1:
+            perp_clock = cell.direction[0].perpendicular_clockwise()
+            perp_counter_clock = cell.direction[0].perpendicular_counterclockwise()
+            reverse = cell.direction[0].mul_int(-1)
+            newpos1 = pos.add(reverse)
+            newpos2 = pos.add(perp_counter_clock)
+            newpos3 = newpos1.add(perp_counter_clock)
+            newpos4 = newpos1.add(perp_clock)
+            return any([recursive_priority_search(cellmap, newpos1, depth+1),
+                        recursive_priority_search(cellmap, newpos2, depth+1),
+                        recursive_priority_search(cellmap, newpos3, depth+1),
+                        recursive_priority_search(cellmap, newpos4, depth+1)
+                        ])
+        else:
+            perp_clock = cell.direction[0].perpendicular_clockwise()
+            perp_counter_clock = cell.direction[0].perpendicular_counterclockwise()
+            reverse = cell.direction[0].mul_int(-1)
+            newpos1 = pos.add(reverse)
+            newpos2 = pos.add(perp_counter_clock)
+            newpos3 = newpos1.add(perp_counter_clock)
+            newpos4 = newpos1.add(perp_clock)
+
+            perp_clock2 = cell.direction[1].perpendicular_clockwise()
+            perp_counter_clock2 = cell.direction[1].perpendicular_counterclockwise()
+            reverse2 = cell.direction[1].mul_int(-1)
+            newpos1_2 = pos.add(reverse2)
+            newpos2_2 = pos.add(perp_counter_clock2)
+            newpos3_2 = newpos1.add(perp_counter_clock2)
+            newpos4_2 = newpos1.add(perp_clock2)
+            return any([recursive_priority_search(cellmap, newpos1, depth + 1),
+                        recursive_priority_search(cellmap, newpos2, depth + 1),
+                        recursive_priority_search(cellmap, newpos3, depth + 1),
+                        recursive_priority_search(cellmap, newpos4, depth + 1),
+                        recursive_priority_search(cellmap, newpos1_2, depth + 1),
+                        recursive_priority_search(cellmap, newpos2_2, depth + 1),
+                        recursive_priority_search(cellmap, newpos3_2, depth + 1),
+                        recursive_priority_search(cellmap, newpos4_2, depth + 1)
+                        ])
+
+
 class Simulation:
     def __init__(
         self,
@@ -145,9 +194,11 @@ class Simulation:
             ), "Invalid position"
             assert self.cellmap[pos.x, pos.y].kind == "road", "Position is not a road"
         assert 0 < vel < 5, "Invalid velocity"
-        car = Car(position=pos, velocity=choice([1, 2, 3, 4]), idx=idx)
-        self.cellmap[pos.x, pos.y].car = car
-        self.cars.append(car)
+        if self.cellmap[pos.x, pos.y].car is None:
+            # car = Car(position=pos, velocity=choice([1, 2, 3, 4]), idx=idx)
+            car = Car(position=pos, velocity=1, idx=idx)
+            self.cellmap[pos.x, pos.y].car = car
+            self.cars.append(car)
 
     def modify_starting_point(self, vec):
         for p in self.starting_point:
@@ -341,20 +392,22 @@ class Simulation:
                 except IndexError:
                     pass
 
+                # priority_check
                 priorityflag = False
                 if self.cellmap[car.position.x, car.position.y].priority is not True:
                     if self.cellmap[newpos.x, newpos.y].priority is True:
-                        for dir in self.cellmap[newpos.x, newpos.y].direction:
-                            currX = deepcopy(newpos.x) - dir.x
-                            currY = deepcopy(newpos.y) - dir.y
-                            for _ in range(4):
-                                if self.cellmap[currX, currY].priority is False:
-                                    break
-                                elif self.cellmap[currX, currY].car is not None:
-                                    priorityflag = True
-                                    break
-                                currX -= self.cellmap[currX, currY].direction[0].x
-                                currY -= self.cellmap[currX, currY].direction[0].y
+                        # for dir in self.cellmap[newpos.x, newpos.y].direction:
+                        #     currX = deepcopy(newpos.x) - dir.x
+                        #     currY = deepcopy(newpos.y) - dir.y
+                        #     for _ in range(4):
+                        #         if self.cellmap[currX, currY].priority is False:
+                        #             break
+                        #         elif self.cellmap[currX, currY].car is not None:
+                        #             priorityflag = True
+                        #             break
+                        #         currX -= self.cellmap[currX, currY].direction[0].x
+                        #         currY -= self.cellmap[currX, currY].direction[0].y
+                        priorityflag = recursive_priority_search(self.cellmap, newpos, 0)
                 if priorityflag is True:
                     self.colormap[car.position.x, car.position.y] = self.slowcolor
                     self.slow_cars += 1

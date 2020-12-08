@@ -813,7 +813,7 @@ class GUI:
             msg.showerror("Error", "Number of iterations must be an integer")
             return
         check_string = self.cars_entry.get()
-        car_num = 0
+        # car_num = 0
         if re.match("^[0-9]+$", check_string):
             cars_number = int(check_string)
             if isinstance(cars_number, int) and cars_number > 0:
@@ -873,8 +873,10 @@ class GUI:
                 # simulation
                 while self.model_preview.currentIteration < max_iters:
                     if len(self.model_preview.cars) < cars_number:
-                        self.model_preview.add_car(idx=car_num)
-                        car_num = (car_num + 1) % cars_number
+                        for missing_idx in range(cars_number):
+                            if not any(c.idx == missing_idx for c in self.model_preview.cars):
+                                self.model_preview.add_car(idx=missing_idx)
+                                # car_num = (car_num + 1) % cars_number
                     self.model_preview.step(cars_number)
                     self.model_preview.print_map("Map")
                     if len(self.model_preview.flow_flags) > 0:

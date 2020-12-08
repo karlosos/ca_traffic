@@ -26,3 +26,6 @@ class Vec2D:
 
     def perpendicular_clockwise(self):
         return Vec2D(self.y, -self.x)
+
+    def perpendicular_counterclockwise(self):
+        return Vec2D(-self.y, self.x)
