@@ -195,8 +195,8 @@ class Simulation:
             assert self.cellmap[pos.x, pos.y].kind == "road", "Position is not a road"
         assert 0 < vel < 5, "Invalid velocity"
         if self.cellmap[pos.x, pos.y].car is None:
-            # car = Car(position=pos, velocity=choice([1, 2, 3, 4]), idx=idx)
-            car = Car(position=pos, velocity=1, idx=idx)
+            car = Car(position=pos, velocity=choice([1, 2, 3, 4]), idx=idx)
+            # car = Car(position=pos, velocity=1, idx=idx)
             self.cellmap[pos.x, pos.y].car = car
             self.cars.append(car)
 
