@@ -2,6 +2,400 @@ from src.vec_2d import Vec2D
 from src.traffic_lights import TrafficLight
 
 
+def create_roundabout_double(mp):
+    # Down
+    for cell in mp.cellmap[21:28, 10]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[18:20, 11]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[21:28, 11]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[29:31, 11]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[19:20, 12]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[29:30, 12]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[15:16, 13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[17:18, 13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[31:32, 13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    for cell in mp.cellmap[33:34, 13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 0))
+
+    # Up
+    for cell in mp.cellmap[22:29, 39]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[19:21, 38]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[22:29, 38]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[30:32, 38]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[20:21, 37]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[30:31, 37]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[16:17, 36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[18:19, 36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[32:33, 36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    for cell in mp.cellmap[34:35, 36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 0))
+
+    # left
+    for cell in mp.cellmap[10, 22:29]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[11, 19:21]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[11, 22:29]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[11, 30:32]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[12, 20:21]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[12, 30:31]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[13, 16:17]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[13, 18:19]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[13, 32:33]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    for cell in mp.cellmap[13, 34:35]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, -1))
+
+    # right
+    for cell in mp.cellmap[39, 21:28]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[38, 18:20]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[38, 21:28]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[38, 29:31]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[37, 19:20]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[37, 29:30]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[36, 15:16]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[36, 17:18]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[36, 31:32]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+    for cell in mp.cellmap[36, 33:34]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(0, 1))
+
+# left down
+    for cell in mp.cellmap[10, 21:22]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[11, 21:22]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[11, 18:19]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[12, 17:18]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[12, 19:20]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[13, 15:16]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[13, 17:18]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[14, 14:15]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[14, 16:17]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[15, 15:16]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[16, 13:15]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[17, 12:13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[18, 13:14]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+    for cell in mp.cellmap[20, 11:13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, -1))
+
+# right up
+    for cell in mp.cellmap[39, 28:29]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[38, 28:29]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[38, 31:32]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[37, 30:31]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[37, 32:33]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[36, 32:33]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[36, 34:35]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[35, 33:34]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[35, 35:36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[34, 34:35]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[33, 35:37]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[32, 37:38]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[31, 36:37]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+    for cell in mp.cellmap[29, 37:39]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, 1))
+
+# right down
+    for cell in mp.cellmap[28:29, 10]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[28:29, 11]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[31:32, 11]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[30:31, 12]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[32:33, 12]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[32:33, 13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[34:35, 13]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[33:34, 14]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[35:36, 14]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[34:35, 15]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[35:37, 16]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[37:38, 17]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[36:37, 18]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+    for cell in mp.cellmap[37:39, 20]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(1, 1))
+
+# left up
+    for cell in mp.cellmap[21:22, 39]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[21:22, 38]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[18:19, 38]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[17:18, 37]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[19:20, 37]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[15:16, 36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[17:18, 36]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[14:15, 35]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[16:17, 35]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[15:16, 34]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[13:15, 33]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[12:13, 32]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[13:14, 31]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+    for cell in mp.cellmap[11:13, 29]:
+        cell.kind = "road"
+        cell.direction.append(Vec2D(-1, -1))
+
+
 def create_roundabout(mp):
     # Down
     for cell in mp.cellmap[18:31, 0]:

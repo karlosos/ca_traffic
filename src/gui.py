@@ -75,6 +75,7 @@ class GUI:
         self.part_options_listbox.insert(16, "priority")
         self.part_options_listbox.insert(17, "starting_point")
         self.part_options_listbox.insert(18, "Part flow measurment")
+        self.part_options_listbox.insert(19, "Double roundabout")
         self.load_button = tk.Button(
             master=self.master, text="Load model", command=self.load_part
         )
@@ -437,6 +438,10 @@ class GUI:
         elif self.currentlychosen == 17:
             self.part_preview = Simulation(1, 1)
             self.part_preview.starting_point.append(Vec2D(0, 0))
+            self.make_preview()
+        elif self.currentlychosen == 19:
+            self.part_preview = Simulation(50, 50)
+            create_roundabout_double(self.part_preview)
             self.make_preview()
 
     def place_part(self, event):
