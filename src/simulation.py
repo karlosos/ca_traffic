@@ -417,13 +417,28 @@ class Simulation:
                     break
 
                 if self.cellmap[newpos.x, newpos.y].car is not None:
-                    car.velocity = self.cellmap[newpos.x, newpos.y].car.velocity
-                    self.colormap[car.position.x, car.position.y] = self.slowcolor
-                    self.slow_cars += 1
-                    cell.jammed += 1
-                    if self.slow_cars > self.max_slow_cars:
-                        self.max_slow_cars = self.slow_cars
-                    break
+                    cl = direction.perpendicular_clockwise()
+                    ccl = direction.perpendicular_counterclockwise()
+                    potential1 = car.position.add(cl)
+                    potential1cell = self.cellmap[potential1.x, potential1.y]
+                    potential2 = car.position.add(ccl)
+                    potential2cell = self.cellmap[potential2.x, potential2.y]
+                    if potential1cell.kind == "road" \
+                        and any(d == direction for d in potential1cell.direction) \
+                            and potential1cell.car is None:
+                        newpos = potential1
+                    elif potential2cell.kind == "road" \
+                        and any(d == direction for d in potential2cell.direction) \
+                            and potential2cell.car is None:
+                        newpos = potential2
+                    else:
+                        car.velocity = self.cellmap[newpos.x, newpos.y].car.velocity
+                        self.colormap[car.position.x, car.position.y] = self.slowcolor
+                        self.slow_cars += 1
+                        cell.jammed += 1
+                        if self.slow_cars > self.max_slow_cars:
+                            self.max_slow_cars = self.slow_cars
+                        break
                 else:
                     car.velocity = car.defaultvelocity
 
