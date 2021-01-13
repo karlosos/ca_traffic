@@ -231,35 +231,42 @@ class Simulation:
                     car.position.x + car.oldDirection.y,
                     car.position.y - car.oldDirection.x,
                 ]
-            if car.velocity == 0 and (
-                (
-                    self.cellmap[nextCellPos.x, nextCellPos.y].car is None
-                    and car.flag is False
-                )
-                or (
-                    car.flag is True
-                    and self.cellmap[
-                        potentialTrafficLightPosition[0],
-                        potentialTrafficLightPosition[1],
-                    ].trafficLight.currentColor
-                    != RED
-                )
-            ):
+            try:
+                if car.velocity == 0 and (
+                    (
+                        self.cellmap[nextCellPos.x, nextCellPos.y].car is None
+                        and car.flag is False
+                    )
+                    or (
+                        car.flag is True
+                        and self.cellmap[
+                            potentialTrafficLightPosition[0],
+                            potentialTrafficLightPosition[1],
+                        ].trafficLight.currentColor
+                        != RED
+                    )
+                ):
+                    car.velocity = car.defaultvelocity
+                    car.flag = False
+            except AttributeError:
                 car.velocity = car.defaultvelocity
                 car.flag = False
             for _ in range(car.velocity):
                 # run
                 nextCellPos = car.position.add(car.oldDirection)
-                if abs(car.oldDirection.y) == 1:
-                    potentialTrafficLightPosition = [
-                        nextCellPos.x + car.oldDirection.y,
-                        nextCellPos.y + car.oldDirection.x,
-                    ]
-                else:
-                    potentialTrafficLightPosition = [
-                        nextCellPos.x - car.oldDirection.y,
-                        nextCellPos.y - car.oldDirection.x,
-                    ]
+                # if abs(car.oldDirection.y) == 1:
+                #     potentialTrafficLightPosition = [
+                #         nextCellPos.x + car.oldDirection.y,
+                #         nextCellPos.y + car.oldDirection.x,
+                #     ]
+                # else:
+                #     potentialTrafficLightPosition = [
+                #         nextCellPos.x - car.oldDirection.y,
+                #         nextCellPos.y - car.oldDirection.x,
+                #     ]
+                perp = car.oldDirection.perpendicular_clockwise()
+                tr = nextCellPos.add(perp)
+                potentialTrafficLightPosition = [tr.x, tr.y]
                 cell = self.cellmap[car.position.x, car.position.y]
                 if (
                     self.cellmap[
