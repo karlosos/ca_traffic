@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from random import randrange, choice
+from numpy.random import choice as choice2
 import math
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -30,10 +31,12 @@ def recursive_priority_search(cellmap, pos, depth):
             newpos2 = pos.add(perp_counter_clock)
             newpos3 = newpos1.add(perp_counter_clock)
             newpos4 = newpos1.add(perp_clock)
-            return any([recursive_priority_search(cellmap, newpos1, depth+1),
-                        recursive_priority_search(cellmap, newpos2, depth+1),
-                        recursive_priority_search(cellmap, newpos3, depth+1),
-                        recursive_priority_search(cellmap, newpos4, depth+1)
+            newpos5 = pos.add(perp_clock)
+            return any([recursive_priority_search(cellmap, newpos1, depth + 1),
+                        recursive_priority_search(cellmap, newpos2, depth + 1),
+                        recursive_priority_search(cellmap, newpos3, depth + 1),
+                        recursive_priority_search(cellmap, newpos4, depth + 1),
+                        recursive_priority_search(cellmap, newpos5, depth + 1)
                         ])
         else:
             perp_clock = cell.direction[0].perpendicular_clockwise()
@@ -43,6 +46,7 @@ def recursive_priority_search(cellmap, pos, depth):
             newpos2 = pos.add(perp_counter_clock)
             newpos3 = newpos1.add(perp_counter_clock)
             newpos4 = newpos1.add(perp_clock)
+            newpos5 = pos.add(perp_clock)
 
             perp_clock2 = cell.direction[1].perpendicular_clockwise()
             perp_counter_clock2 = cell.direction[1].perpendicular_counterclockwise()
@@ -51,14 +55,17 @@ def recursive_priority_search(cellmap, pos, depth):
             newpos2_2 = pos.add(perp_counter_clock2)
             newpos3_2 = newpos1.add(perp_counter_clock2)
             newpos4_2 = newpos1.add(perp_clock2)
+            newpos5_2 = pos.add(perp_clock2)
             return any([recursive_priority_search(cellmap, newpos1, depth + 1),
                         recursive_priority_search(cellmap, newpos2, depth + 1),
                         recursive_priority_search(cellmap, newpos3, depth + 1),
                         recursive_priority_search(cellmap, newpos4, depth + 1),
+                        recursive_priority_search(cellmap, newpos5, depth + 1),
                         recursive_priority_search(cellmap, newpos1_2, depth + 1),
                         recursive_priority_search(cellmap, newpos2_2, depth + 1),
                         recursive_priority_search(cellmap, newpos3_2, depth + 1),
-                        recursive_priority_search(cellmap, newpos4_2, depth + 1)
+                        recursive_priority_search(cellmap, newpos4_2, depth + 1),
+                        recursive_priority_search(cellmap, newpos5_2, depth + 1)
                         ])
 
 
@@ -121,6 +128,7 @@ class Simulation:
         self.dt_string = ""
         self.car_distances = None
         self.flow_flags = []
+        self.intensities = []
 
     def print_map(self, window):  # działa
         text = (
@@ -186,7 +194,9 @@ class Simulation:
 
     def add_car(self, pos=None, vel=1, idx=-1):
         if pos is None:
-            pos = choice(self.starting_point)
+            if np.sum(self.intensities) > 1:
+                self.intensities = np.divide(self.intensities, np.sum(self.intensities))
+            pos = choice2(self.starting_point, p=self.intensities)
         else:
             assert (
                 0 <= pos.x < self.cellmap.shape[0]
@@ -200,14 +210,16 @@ class Simulation:
             self.cellmap[pos.x, pos.y].car = car
             self.cars.append(car)
 
-    def modify_starting_point(self, vec):
+    def modify_starting_point(self, vec, inte):
         for p in self.starting_point:
             if p.equal(vec):
                 self.colormap[p.x, p.y] = self.roadcolor
+                self.intensities.pop(self.starting_point.index(p))
                 self.starting_point.remove(p)
                 return
 
         self.starting_point.append(vec)
+        self.intensities.append(inte)
         try:
             self.colormap[vec.x, vec.y] = self.startingcolor
         except AttributeError:
@@ -293,6 +305,7 @@ class Simulation:
                     self.colormap[car.position.x, car.position.y] = self.slowcolor
                     self.cellmap[car.position.x, car.position.y].car = car
                     self.slow_cars += 1
+                    cell.jammed += 1
                     if self.slow_cars > self.max_slow_cars:
                         self.max_slow_cars = self.slow_cars
                     break

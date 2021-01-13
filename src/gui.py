@@ -213,6 +213,12 @@ class GUI:
             self.model_preview.starting_point = simulation.starting_point
         except AttributeError:
             pass
+        try:
+            self.model_preview.intensities = simulation.intensities
+        except AttributeError:
+            n = len(self.model_preview.starting_point)
+            for _ in self.model_preview.starting_point:
+                self.model_preview.intensities.append(1/n)
         self.model_preview.cellmap = simulation.cellmap
         self.model_preview.colormap = simulation.colormap
         self.refresh_model_preview()
@@ -328,8 +334,9 @@ class GUI:
             self.straight_road_entry_length.place_forget()
             self.straight_road_direction_label.place_forget()
             self.straight_road_entry_direction.place_forget()
-            self.straight_road_entry_length.delete(0, "end")
-            self.straight_road_entry_direction.delete(0, "end")
+        self.straight_road_entry_width.delete(0, "end")
+        self.straight_road_entry_length.delete(0, "end")
+        self.straight_road_entry_direction.delete(0, "end")
         if self.currentlychosen == 0:
             self.part_preview = Simulation(1, 1)
             self.make_preview()
@@ -438,6 +445,10 @@ class GUI:
         elif self.currentlychosen == 17:
             self.part_preview = Simulation(1, 1)
             self.part_preview.starting_point.append(Vec2D(0, 0))
+            self.straight_road_width_label.place(x=25, y=350)
+            self.straight_road_width_label.configure(text="Intensity")
+            self.straight_road_entry_width.place(x=100, y=350, width=50, height=25)
+            self.straight_road_entry_width.insert(0, "0")
             self.make_preview()
         elif self.currentlychosen == 19:
             self.part_preview = Simulation(50, 50)
@@ -679,7 +690,12 @@ class GUI:
 
             elif self.currentlychosen == 17:
                 if self.model_preview.cellmap[row, col].kind == "road":
-                    self.model_preview.modify_starting_point(Vec2D(row, col))
+                    try:
+                        tmp = float(self.straight_road_entry_width.get())
+                    except ValueError:
+                        msg.showerror("Error!", "The value must be integer!")
+                        return
+                    self.model_preview.modify_starting_point(Vec2D(row, col), tmp)
                 else:
                     msg.showerror("Error", "Target must be a road")
             else:
