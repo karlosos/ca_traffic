@@ -692,6 +692,9 @@ class GUI:
                 if self.model_preview.cellmap[row, col].kind == "road":
                     try:
                         tmp = float(self.straight_road_entry_width.get())
+                        if tmp == 0:
+                            msg.showerror('Error!', 'Intensity cannot be 0!')
+                            return
                     except ValueError:
                         msg.showerror("Error!", "The value must be integer!")
                         return
