@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 Now you have successfully configured your environment.
 
-## Running application
+## Running the application
 
 Run `main.py` with:
 
@@ -46,7 +46,7 @@ Run `main.py` with:
 python main.py
 ```
 
-## Using application
+## Using the application
 ![https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/f1013e1a-1f14-4736-9f97-d84c2e3b7355/ded8n9t-ec71cadb-8f60-44a9-b2e9-9097f7757461.png/v1/fill/w_1247,h_641,q_70,strp/interface_instr_by_autor52_ded8n9t-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD02NTgiLCJwYXRoIjoiXC9mXC9mMTAxM2UxYS0xZjE0LTQ3MzYtOWY5Ny1kODRjMmUzYjczNTVcL2RlZDhuOXQtZWM3MWNhZGItOGY2MC00NGE5LWIyZTktOTA5N2Y3NzU3NDYxLnBuZyIsIndpZHRoIjoiPD0xMjgwIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.16nL50rD70rYiBRaBM3uLLD-kIDywmJCEgXyOVx9bpc](https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/f1013e1a-1f14-4736-9f97-d84c2e3b7355/ded8n9t-ec71cadb-8f60-44a9-b2e9-9097f7757461.png/v1/fill/w_1247,h_641,q_70,strp/interface_instr_by_autor52_ded8n9t-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3siaGVpZ2h0IjoiPD02NTgiLCJwYXRoIjoiXC9mXC9mMTAxM2UxYS0xZjE0LTQ3MzYtOWY5Ny1kODRjMmUzYjczNTVcL2RlZDhuOXQtZWM3MWNhZGItOGY2MC00NGE5LWIyZTktOTA5N2Y3NzU3NDYxLnBuZyIsIndpZHRoIjoiPD0xMjgwIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.16nL50rD70rYiBRaBM3uLLD-kIDywmJCEgXyOVx9bpc)
 
 The interface has 12 elements with following functions:
