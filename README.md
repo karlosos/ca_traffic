@@ -88,6 +88,14 @@ As of the moment of writing this section, the app supports a choice of 20 pre-de
 19. Part flow measurement - a block used to place a flag with flexible size that collects data on traffic flow in the selected area
 20. Double roundabout - A basic roundabout with a width of 2 pixels, also has smaller size compared to the other one
 
+### Workflow
+To start modelling all a user has to  do is to select a block and load it. Some blocks are flexible, meaning their parameters can be adjusted. It is then possible to place as many copies of this block as necessary. When two blocks intersect on a cell, their directions are summed (for example, if 2 straight roads intersect, they form an intersection). The default action (direction) is then defined by the oldest road on a given cell, while the other direction is treated as an alternative. Each cell can have up to 2 directions to choose from. 
+The model size can be adjusted on the go, however it's worth noting that if there are any road cells beyond the new model size(when reducing the size), they will be deleted.
+It is recommended to place the measuring flags after the model is finished (and optionally saved) as they cannot be deleted.
+Every model requires a placement of at least 1 starting point. The starting points can be added and removed using the same tool. Each of those points requires specifying an intensity, so it is recommended to either carefully plan their placement or experiment with a previously saved copy of the model.
+Once the model is finished, the user can specify the parameters of the simulation (maximum steps and car number). Once those are satisfactory, the simulation can be started by pressing the appropriate button.
+The user can either wait for the simulation to end or cancel it early in case of collecting a satisfactory amount of data. The results are then saved to a subfolder with name based on the starting time of the simulation, under the "Results" folder.
+
 ## Contributing 
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
